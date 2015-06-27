@@ -1,0 +1,19 @@
+{
+  "name": "jungler",
+  "version": "0.0.0",
+  "description": "AngularJS Jasmine test generator",
+  "main": "index.js",
+  "author": "Michael Radionov (https://github.com/mradionov)",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mradionov/jungler"
+  },
+  "dependencies": {
+    "esprima": "^2.4.0",
+    "estraverse": "^4.1.0",
+    "handlebars": "^3.0.3"
+  },
+  "devDependencies": {}
+}
