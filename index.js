@@ -20,14 +20,41 @@ fs.readFile(targetPath, function (err, targetSource) {
   }
 
   var controller = result.controllers[0];
+  var module = result.modules[0];
 
+  var deps = controller.deps;
+
+  deps = deps.map(function (dep) {
+    if (dep === '$scope') {
+      return false;
+    }
+    if (dep === '$state') {
+      return {
+        name: dep,
+        type: 'provider'
+      };
+    }
+    if (dep === 'MyService1') {
+      return {
+        name: dep,
+        type: 'service'
+      };
+    }
+    if (dep == 'MyService2') {
+      return {
+        name: dep,
+        type: 'service'
+      };
+    }
+  }).filter(function (n) { return n; });
 
   var data = {
     unit: {
-      name: controller.name
+      name: controller.name,
+      module: module,
+      deps: deps
     }
   };
-
 
   fs.readFile(templatePath, function (err, templateSource) {
     if (err) { throw err; }

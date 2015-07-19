@@ -2,7 +2,7 @@
 
   angular
     .module('app', [])
-    .controller('FirstCtrl', function ($scope, $state, MyService) {
+    .controller('FirstCtrl', function ($scope, $state, MyService1, MyService2) {
 
       // ....
 
