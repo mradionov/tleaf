@@ -29,18 +29,18 @@ function parse(source) {
     }
   });
 
-  var details = {
-    controllers: [],
-    modules: []
-  };
+  var units = [];
 
   callExpressions.forEach(function (callExpression) {
 
+    var nameArg, fnArg;
     var type = callExpression.callee.property.name;
 
+    /* module branch irrelevant */
     if (type === 'module') {
+      return;
 
-      var nameArg = callExpression.arguments[0];
+      nameArg = callExpression.arguments[0];
 
       var module = {
         name: undefined
@@ -50,15 +50,16 @@ function parse(source) {
         module.name = nameArg.value;
       }
 
-      details.modules.push(module);
 
     } else if (type === 'controller') {
 
-      var nameArg = callExpression.arguments[0];
-      var fnArg = callExpression.arguments[1];
+      nameArg = callExpression.arguments[0];
+      fnArg = callExpression.arguments[1];
 
       var controller = {
         name: undefined,
+        type: 'controller',
+        module: 'app',
         deps: []
       };
 
@@ -74,13 +75,38 @@ function parse(source) {
         });
       }
 
-      details.controllers.push(controller);
+      units.push(controller);
 
+    } else if (type === 'service') {
+
+      nameArg = callExpression.arguments[0];
+      fnArg = callExpression.arguments[1];
+
+      var service = {
+        name: undefined,
+        type: 'service',
+        module: 'app',
+        deps: []
+      };
+
+      if (nameArg.type === 'Literal') {
+        service.name = nameArg.value;
+      }
+
+      if (fnArg.type === 'FunctionExpression') {
+        fnArg.params.forEach(function (param) {
+          if (param.type === 'Identifier') {
+            service.deps.push(param.name);
+          }
+        });
+      }
+
+      units.push(service);
     }
 
   });
 
-  return details;
+  return units;
 }
 
 
