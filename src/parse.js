@@ -16,8 +16,7 @@ function parse(source) {
       if (node.type === 'CallExpression') {
 
         if (node.callee.property &&
-            (node.callee.property.name === 'controller' ||
-             node.callee.property.name === 'module'
+            (node.callee.property.name === 'controller'
             )
         ) {
 
@@ -36,30 +35,17 @@ function parse(source) {
     var nameArg, fnArg;
     var type = callExpression.callee.property.name;
 
-    /* module branch irrelevant */
-    if (type === 'module') {
-      return;
-
-      nameArg = callExpression.arguments[0];
-
-      var module = {
-        name: undefined
-      };
-
-      if (nameArg.type === 'Literal') {
-        module.name = nameArg.value;
-      }
-
-
-    } else if (type === 'controller') {
+    if (type === 'controller') {
 
       nameArg = callExpression.arguments[0];
       fnArg = callExpression.arguments[1];
 
+      var module = callExpression.callee.object.arguments[0].value;
+
       var controller = {
         name: undefined,
         type: 'controller',
-        module: 'app',
+        module: module,
         deps: []
       };
 
@@ -77,31 +63,6 @@ function parse(source) {
 
       units.push(controller);
 
-    } else if (type === 'service') {
-
-      nameArg = callExpression.arguments[0];
-      fnArg = callExpression.arguments[1];
-
-      var service = {
-        name: undefined,
-        type: 'service',
-        module: 'app',
-        deps: []
-      };
-
-      if (nameArg.type === 'Literal') {
-        service.name = nameArg.value;
-      }
-
-      if (fnArg.type === 'FunctionExpression') {
-        fnArg.params.forEach(function (param) {
-          if (param.type === 'Identifier') {
-            service.deps.push(param.name);
-          }
-        });
-      }
-
-      units.push(service);
     }
 
   });
