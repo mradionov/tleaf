@@ -1,7 +1,12 @@
 'use strict';
 
 var esprima = require('esprima'),
-    estraverse = require('estraverse');
+    estraverse = require('estraverse'),
+    _ = require('lodash');
+
+var TYPES = [
+  'controller'
+];
 
 
 function parse(source) {
@@ -9,6 +14,7 @@ function parse(source) {
   var syntax = esprima.parse(source);
 
   var callExpressions = [];
+  var variableDeclarators = [];
 
   estraverse.traverse(syntax, {
     enter: function (node) {
@@ -20,10 +26,12 @@ function parse(source) {
             )
         ) {
 
-          callExpressions.push(node);
+          callExpressions.unshift(node);
 
         }
 
+      } else if (node.type === 'VariableDeclaration') {
+        variableDeclarators.unshift.apply(variableDeclarators, node.declarations);
       }
     }
   });
@@ -32,36 +40,17 @@ function parse(source) {
 
   callExpressions.forEach(function (callExpression) {
 
-    var nameArg, fnArg;
     var type = callExpression.callee.property.name;
-
     if (type === 'controller') {
 
-      nameArg = callExpression.arguments[0];
-      fnArg = callExpression.arguments[1];
-
-      var module = callExpression.callee.object.arguments[0].value;
-
       var controller = {
-        name: undefined,
+        name: findName(callExpression),
         type: 'controller',
-        module: module,
-        deps: []
+        module: findModule(callExpression, variableDeclarators),
+        deps: findDeps(callExpression)
       };
 
-      if (nameArg.type === 'Literal') {
-        controller.name = nameArg.value;
-      }
-
-      if (fnArg.type === 'FunctionExpression') {
-        fnArg.params.forEach(function (param) {
-          if (param.type === 'Identifier') {
-            controller.deps.push(param.name);
-          }
-        });
-      }
-
-      units.push(controller);
+      units.unshift(controller);
 
     }
 
@@ -70,5 +59,82 @@ function parse(source) {
   return units;
 }
 
+function findVariableDeclarator(varName, variableDeclarators) {
+  var variableDeclarator = _.filter(variableDeclarators, function (vd) {
+    return vd.id.name === varName;
+  });
+
+  return _.first(variableDeclarator);
+}
+
+function findName(callExpression) {
+  var name;
+
+  var nameArg = callExpression.arguments[0] || {};
+  if (nameArg.type === 'Literal') {
+    name = nameArg.value;
+  }
+
+  return name;
+}
+
+// TODO: is "module" a reserved word in node.js? is it safe to use? if scoped?
+function findModule(callExpression, variableDeclarators) {
+  var module;
+
+  if (callExpression.callee.object.type === 'CallExpression') {
+
+    return findModule(callExpression.callee.object, variableDeclarators);
+
+  } else if (callExpression.callee.object.type === 'Identifier') {
+
+    if (callExpression.callee.property.name === 'module' &&
+      callExpression.callee.object.name === 'angular'
+    ) {
+
+      module = callExpression.arguments[0].value;
+
+    } else if (_.contains(TYPES, callExpression.callee.property.name)) {
+
+      var varName = callExpression.callee.object.name;
+      var varDeclarator = findVariableDeclarator(varName, variableDeclarators);
+      if (varDeclarator && varDeclarator.init.callee.property.name === 'module') {
+
+        module = varDeclarator.init.arguments[0].value;
+
+      } else {
+        // uncovered
+      }
+
+    } else {
+      // uncovered
+    }
+
+  } else {
+    // uncovered
+  }
+
+  return module;
+}
+
+function findDeps(callExpression) {
+  var deps = [];
+
+  var depsArg = callExpression.arguments[1] || {};
+
+  if (depsArg.type === 'ArrayExpression') {
+    depsArg = _.last(depsArg.elements) || {};
+  }
+
+  if (depsArg.type === 'FunctionExpression') {
+    depsArg.params.forEach(function (param) {
+      if (param.type === 'Identifier') {
+        deps.push(param.name);
+      }
+    });
+  }
+
+  return deps;
+}
 
 module.exports = parse;
