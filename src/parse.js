@@ -15,6 +15,7 @@ function parse(source) {
 
   var callExpressions = [];
   var variableDeclarators = [];
+  var functionDeclarations = [];
 
   estraverse.traverse(syntax, {
     enter: function (node) {
@@ -32,6 +33,8 @@ function parse(source) {
 
       } else if (node.type === 'VariableDeclaration') {
         variableDeclarators.unshift.apply(variableDeclarators, node.declarations);
+      } else if (node.type === 'FunctionDeclaration') {
+        functionDeclarations.unshift(node);
       }
     }
   });
@@ -47,7 +50,7 @@ function parse(source) {
         name: findName(callExpression),
         type: 'controller',
         module: findModule(callExpression, variableDeclarators),
-        deps: findDeps(callExpression)
+        deps: findDeps(callExpression, variableDeclarators, functionDeclarations)
       };
 
       units.unshift(controller);
@@ -65,6 +68,14 @@ function findVariableDeclarator(varName, variableDeclarators) {
   });
 
   return _.first(variableDeclarator);
+}
+
+function findFunctionDeclaration(funcName, functionDeclarations) {
+  var functionDeclaration = _.filter(functionDeclarations, function (fd) {
+    return fd.id.name === funcName;
+  });
+
+  return _.first(functionDeclaration);
 }
 
 function findName(callExpression) {
@@ -117,13 +128,40 @@ function findModule(callExpression, variableDeclarators) {
   return module;
 }
 
-function findDeps(callExpression) {
+function findDeps(callExpression, variableDeclarators, functionDeclarations) {
   var deps = [];
 
   var depsArg = callExpression.arguments[1] || {};
 
   if (depsArg.type === 'ArrayExpression') {
+
     depsArg = _.last(depsArg.elements) || {};
+
+  } else if (depsArg.type === 'Identifier') {
+
+    var identifierName = depsArg.name;
+    var identifier = findVariableDeclarator(identifierName, variableDeclarators);
+    if (!identifier) {
+      identifier = findFunctionDeclaration(identifierName, functionDeclarations);
+    }
+
+    if (identifier) {
+
+      var params = [];
+      if (identifier.type === 'FunctionDeclaration') {
+        params = identifier.params;
+      } else if (identifier.type === 'VariableDeclarator') {
+        params = identifier.init.params;
+      }
+
+      params.forEach(function (param) {
+        if (param.type === 'Identifier') {
+          deps.push(param.name);
+        }
+      });
+
+    }
+
   }
 
   if (depsArg.type === 'FunctionExpression') {
