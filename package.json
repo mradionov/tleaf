@@ -11,6 +11,7 @@
     "url": "https://github.com/mradionov/jungler"
   },
   "dependencies": {
+    "escope": "^3.2.0",
     "esprima": "^2.4.0",
     "estraverse": "^4.1.0",
     "inquirer": "^0.9.0",

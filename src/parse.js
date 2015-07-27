@@ -2,6 +2,7 @@
 
 var esprima = require('esprima'),
     estraverse = require('estraverse'),
+    escope = require('escope'),
     _ = require('lodash');
 
 var TYPES = [
@@ -11,74 +12,63 @@ var TYPES = [
 
 function parse(source) {
 
-  var syntax = esprima.parse(source);
+  var ast = esprima.parse(source);
+  var scopeManager = escope.analyze(ast);
 
-  var callExpressions = [];
-  var variableDeclarators = [];
-  var functionDeclarations = [];
+  // global scope
+  var currentScope = scopeManager.acquire(ast);
 
-  estraverse.traverse(syntax, {
+  var calls = [];
+
+  estraverse.traverse(ast, {
     enter: function (node) {
 
       if (node.type === 'CallExpression') {
 
-        if (node.callee.property &&
-            (node.callee.property.name === 'controller'
-            )
-        ) {
+        if (_.contains(TYPES, _.get(node, 'callee.property.name'))) {
 
-          callExpressions.unshift(node);
+          calls.push({
+            node: node,
+            scope: currentScope
+          });
 
         }
 
-      } else if (node.type === 'VariableDeclaration') {
-        variableDeclarators.unshift.apply(variableDeclarators, node.declarations);
-      } else if (node.type === 'FunctionDeclaration') {
-        functionDeclarations.unshift(node);
       }
+
+      if (/Function/.test(node.type)) {
+        currentScope = scopeManager.acquire(node);
+      }
+    },
+    leave: function (node) {
+
+      if (/Function/.test(node.type)) {
+        currentScope = currentScope.upper;
+      }
+
     }
   });
 
+
   var units = [];
 
-  callExpressions.forEach(function (callExpression) {
+  calls.forEach(function (call) {
 
-    var type = callExpression.callee.property.name;
-    if (type === 'controller') {
+    var callExpression = call.node, scope = call.node;
 
-      var controller = {
-        name: findName(callExpression),
-        type: 'controller',
-        module: findModule(callExpression, variableDeclarators),
-        deps: findDeps(callExpression, variableDeclarators, functionDeclarations)
-      };
-
-      units.unshift(controller);
-
-    }
+    units.push({
+      name: findName(call.node, call.scope),
+      type: 'controller',
+      module: findModule(call.node, call.scope),
+      deps: findDeps(call.node, call.scope)
+    });
 
   });
 
   return units;
 }
 
-function findVariableDeclarator(varName, variableDeclarators) {
-  var variableDeclarator = _.filter(variableDeclarators, function (vd) {
-    return vd.id.name === varName;
-  });
-
-  return _.first(variableDeclarator);
-}
-
-function findFunctionDeclaration(funcName, functionDeclarations) {
-  var functionDeclaration = _.filter(functionDeclarations, function (fd) {
-    return fd.id.name === funcName;
-  });
-
-  return _.first(functionDeclaration);
-}
-
-function findName(callExpression) {
+function findName(callExpression, scope) {
   var name;
 
   var nameArg = callExpression.arguments[0] || {};
@@ -90,17 +80,19 @@ function findName(callExpression) {
 }
 
 // TODO: is "module" a reserved word in node.js? is it safe to use? if scoped?
-function findModule(callExpression, variableDeclarators) {
+// TODO: parent scope
+// TODO: multiple variable definitions
+function findModule(callExpression, scope) {
   var module;
 
   if (callExpression.callee.object.type === 'CallExpression') {
 
-    return findModule(callExpression.callee.object, variableDeclarators);
+    return findModule(callExpression.callee.object, scope);
 
   } else if (callExpression.callee.object.type === 'Identifier') {
 
     if (callExpression.callee.property.name === 'module' &&
-      callExpression.callee.object.name === 'angular'
+        callExpression.callee.object.name === 'angular'
     ) {
 
       module = callExpression.arguments[0].value;
@@ -108,27 +100,24 @@ function findModule(callExpression, variableDeclarators) {
     } else if (_.contains(TYPES, callExpression.callee.property.name)) {
 
       var varName = callExpression.callee.object.name;
-      var varDeclarator = findVariableDeclarator(varName, variableDeclarators);
-      if (varDeclarator && varDeclarator.init.callee.property.name === 'module') {
+      var variable = _.findWhere(scope.variables, { name: varName });
+      if (variable) {
 
-        module = varDeclarator.init.arguments[0].value;
+        var varNode = _.first(variable.defs).node;
+        module = varNode.init.arguments[0].value;
 
-      } else {
-        // uncovered
       }
 
-    } else {
-      // uncovered
     }
 
-  } else {
-    // uncovered
   }
 
   return module;
 }
 
-function findDeps(callExpression, variableDeclarators, functionDeclarations) {
+// TODO: parent scope
+// TODO: multiple variable definitions
+function findDeps(callExpression, scope) {
   var deps = [];
 
   var depsArg = callExpression.arguments[1] || {};
@@ -139,19 +128,18 @@ function findDeps(callExpression, variableDeclarators, functionDeclarations) {
 
   } else if (depsArg.type === 'Identifier') {
 
-    var identifierName = depsArg.name;
-    var identifier = findVariableDeclarator(identifierName, variableDeclarators);
-    if (!identifier) {
-      identifier = findFunctionDeclaration(identifierName, functionDeclarations);
-    }
+    var varName = depsArg.name;
+    var variable = _.findWhere(scope.variables, { name: varName });
 
-    if (identifier) {
+    if (variable) {
+
+      var varNode = _.first(variable.defs).node;
 
       var params = [];
-      if (identifier.type === 'FunctionDeclaration') {
-        params = identifier.params;
-      } else if (identifier.type === 'VariableDeclarator') {
-        params = identifier.init.params;
+      if (varNode.type === 'FunctionDeclaration') {
+        params = varNode.params;
+      } else if (varNode.type === 'VariableDeclarator') {
+        params = varNode.init.params;
       }
 
       params.forEach(function (param) {

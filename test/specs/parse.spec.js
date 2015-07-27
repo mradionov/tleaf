@@ -169,4 +169,25 @@ describe('parse', function () {
     }]);
   });
 
+  it('should extract module from correct scope', function () {
+    var source =
+    "var mod = angular.module('bad-test', []);" +
+    "(function () {" +
+    "   var mod = angular.module('test', []);" +
+    "   mod.controller('TestController', function ($scope) {" +
+    "     var mod = 15;" +
+    "   });" +
+    "}())";
+
+    var units = parse(source);
+
+    assert.lengthOf(units, 1);
+    assert.sameDeepMembers(units, [{
+      type: 'controller',
+      name: 'TestController',
+      module: 'test',
+      deps: ['$scope']
+    }]);
+  });
+
 });
