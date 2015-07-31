@@ -68,16 +68,6 @@ function unitFn(unit) {
 
 function depsFn(unit) {
 
-  var model = {
-    unit: {
-      name: unit.name,
-      module: {
-        name: unit.module.name
-      },
-      deps: unit.deps
-    }
-  };
-
   var templatePath = './src/templates/' + unit.type + '.tpl.js';
 
   if (!fs.existsSync(templatePath)) {
@@ -87,7 +77,7 @@ function depsFn(unit) {
 
   var template = fs.readFileSync(templatePath, 'utf-8');
 
-  var output = generate(unit.type, template, model);
+  var output = generate(template, unit);
 
   fs.writeFileSync(outputPath, output);
 

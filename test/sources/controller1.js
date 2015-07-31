@@ -9,6 +9,9 @@
     })
     .controller('SecondCtrl', function () {
 
+    })
+    .service('MyService1', function ($http, MyService2) {
+
     });
 
 }());

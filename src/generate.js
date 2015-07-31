@@ -21,9 +21,17 @@ env.addFilter('toarg', function (arr, leading, wrapper, delimeter) {
   }).join(dl);
 });
 
-function generate(type, source, data) {
+// TODO: order by type
+// TODO: generate helper properties
+// TODO: inject config
+// TODO: try to simplify templates to remove logic completely
+function generate(template, unit) {
 
-  var result = env.renderString(source, data);
+  var model = {
+    unit: unit
+  };
+
+  var result = env.renderString(template, model);
 
   return result;
 }

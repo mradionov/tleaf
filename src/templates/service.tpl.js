@@ -1,4 +1,4 @@
-describe('Service: MyService1', function () { 'use strict';
+describe('Service: {{ unit.name }}', function () { 'use strict';
 
   var httpBackend;
 
@@ -12,12 +12,12 @@ describe('Service: MyService1', function () { 'use strict';
 
   // Use to inject the code under test
   function _inject() {
-    inject(function ($httpBackend, _$http_, _MyService2_) {
+    inject(function ($httpBackend{{ unit.deps | pluck('name') | toarg(true, '_')}}) {
       httpBackend = $httpBackend;
 
-      $http = _$http_;
-      MyService2 = _MyService2_;
-      
+      {% for dep in unit.deps -%}
+      {{ dep.name }} = _{{ dep.name }}_;
+      {% endfor %}
     });
   }
 
@@ -25,8 +25,9 @@ describe('Service: MyService1', function () { 'use strict';
   function _setup() {
     // Mock any expected data
     _provide(function (provide) {
-      provide.value('$http', {});
-      provide.value('MyService2', {});
+      {%- for dep in unit.deps %}
+      provide.value('{{ dep.name }}', {});
+      {%- endfor %}
     });
 
     // Inject the code under test
@@ -35,7 +36,7 @@ describe('Service: MyService1', function () { 'use strict';
 
   beforeEach(function () {
     // Load the service's module
-    module('app')
+    module('{{ unit.module.name }}')
   });
 
   // make sure no expectations were missed in your tests.

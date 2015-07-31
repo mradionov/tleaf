@@ -12,7 +12,7 @@ function identify(all) {
     unknown: []
   };
 
-  var exclude = ['$scope'];
+  var exclude = ['$scope', '$http'];
 
   var filtered = _.filter(all, function (dep) {
     return !_.contains(exclude, dep.name);
@@ -31,7 +31,7 @@ function identify(all) {
 
   var cache = JSON.parse(fs.readFileSync(cachePath).toString());
 
-  all.forEach(function (dep) {
+  filtered.forEach(function (dep) {
     var found = _.find(cache, { name: dep.name });
     if (found) {
       deps.known.push({

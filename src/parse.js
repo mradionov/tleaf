@@ -6,7 +6,8 @@ var esprima = require('esprima'),
     _ = require('lodash');
 
 var TYPES = [
-  'controller'
+  'controller',
+  'service'
 ];
 
 
@@ -58,7 +59,7 @@ function parse(source) {
 
     units.unshift({
       name: findName(call.node, call.scope),
-      type: 'controller',
+      type: findType(call.node, call.scope),
       module: findModule(call.node, call.scope),
       deps: findDeps(call.node, call.scope)
     });
@@ -77,6 +78,10 @@ function findName(callExpression) {
   }
 
   return name;
+}
+
+function findType(callExpression) {
+  return callExpression.callee.property.name;
 }
 
 // TODO: is "module" a reserved word in node.js? is it safe to use? if scoped?
