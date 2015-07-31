@@ -5,35 +5,41 @@ var _ = require('lodash');
 
 var cachePath = __dirname + '/../test/cache.json';
 
-function identify(unitNames) {
+function identify(all) {
 
   var deps = {
     known: [],
     unknown: []
   };
 
-  var excludeUnits = ['$scope'];
+  var exclude = ['$scope'];
 
-  var units = _.difference(unitNames, excludeUnits);
+  var filtered = _.filter(all, function (dep) {
+    return !_.contains(exclude, dep.name);
+  });
 
-  if (!units.length) {
-    deps.known = units;
+  if (!filtered.length) {
+    deps.known = filtered;
     return deps;
   }
 
+
   if (!fs.existsSync(cachePath)) {
-    deps.unknown = units;
+    deps.unknown = filtered;
     return deps;
   }
 
   var cache = JSON.parse(fs.readFileSync(cachePath).toString());
 
-  units.forEach(function (unit) {
-    var dep = _.find(cache, { name: unit });
-    if (dep) {
-      deps.known.push(dep);
+  all.forEach(function (dep) {
+    var found = _.find(cache, { name: dep.name });
+    if (found) {
+      deps.known.push({
+        name: dep.name,
+        type: found.type
+      });
     } else {
-      deps.unknown.push({ name: unit });
+      deps.unknown.push({ name: dep.name });
     }
   });
 

@@ -56,7 +56,7 @@ function parse(source) {
 
   calls.forEach(function (call) {
 
-    units.push({
+    units.unshift({
       name: findName(call.node, call.scope),
       type: 'controller',
       module: findModule(call.node, call.scope),
@@ -82,7 +82,9 @@ function findName(callExpression) {
 // TODO: is "module" a reserved word in node.js? is it safe to use? if scoped?
 // TODO: multiple variable definitions
 function findModule(callExpression, scope) {
-  var module;
+  var module = {
+    name: ''
+  };
 
   if (callExpression.callee.object.type === 'CallExpression') {
 
@@ -94,7 +96,7 @@ function findModule(callExpression, scope) {
         callExpression.callee.object.name === 'angular'
     ) {
 
-      module = callExpression.arguments[0].value;
+      module.name = callExpression.arguments[0].value;
 
     } else if (_.contains(TYPES, callExpression.callee.property.name)) {
 
@@ -109,7 +111,7 @@ function findModule(callExpression, scope) {
 
       if (variable) {
         var varNode = _.first(variable.defs).node;
-        module = varNode.init.arguments[0].value;
+        module.name = varNode.init.arguments[0].value;
       }
 
     }
@@ -153,7 +155,9 @@ function findDeps(callExpression, scope) {
 
       params.forEach(function (param) {
         if (param.type === 'Identifier') {
-          deps.push(param.name);
+          deps.push({
+            name: param.name
+          });
         }
       });
 
@@ -164,7 +168,9 @@ function findDeps(callExpression, scope) {
   if (depsArg.type === 'FunctionExpression') {
     depsArg.params.forEach(function (param) {
       if (param.type === 'Identifier') {
-        deps.push(param.name);
+        deps.push({
+          name: param.name
+        });
       }
     });
   }

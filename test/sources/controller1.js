@@ -6,6 +6,9 @@
 
       // ....
 
+    })
+    .controller('SecondCtrl', function () {
+
     });
 
 }());

@@ -20,8 +20,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope']
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
@@ -39,8 +39,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope']
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
@@ -55,8 +55,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope']
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
@@ -71,8 +71,14 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope', '$rootScope', 'UserService', 'API_URL', 'moment']
+      module: { name: 'test' },
+      deps: [
+        { name: '$scope' },
+        { name: '$rootScope' },
+        { name: 'UserService' },
+        { name: 'API_URL' },
+        { name: 'moment' }
+      ]
     }]);
   });
 
@@ -88,8 +94,14 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope', '$rootScope', 'UserService', 'API_URL', 'moment']
+      module: { name: 'test' },
+      deps: [
+        { name: '$scope' },
+        { name: '$rootScope' },
+        { name: 'UserService' },
+        { name: 'API_URL' },
+        { name: 'moment' }
+      ]
     }]);
   });
 
@@ -106,17 +118,17 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'Test1Controller',
-      module: 'test',
+      module: { name: 'test' },
       deps: []
     }, {
       type: 'controller',
       name: 'Test2Controller',
-      module: 'test',
+      module: { name: 'test' },
       deps: []
     }, {
       type: 'controller',
       name: 'Test3Controller',
-      module: 'test',
+      module: { name: 'test' },
       deps: []
     }]);
   });
@@ -132,8 +144,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope']
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
@@ -148,8 +160,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope']
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
@@ -166,8 +178,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'testB',
-      deps: ['$scope']
+      module: { name: 'testB' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
@@ -187,8 +199,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope']
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
@@ -205,8 +217,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope']
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
@@ -223,8 +235,8 @@ describe('parse', function () {
     assert.sameDeepMembers(units, [{
       type: 'controller',
       name: 'TestController',
-      module: 'test',
-      deps: ['$scope']
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
     }]);
   });
 
