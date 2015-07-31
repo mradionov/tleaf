@@ -1,5 +1,7 @@
 'use strict';
 
+// TODO: split specs
+
 var assert = require('chai').assert;
 
 var parse = require('./../../src/parse');
@@ -169,7 +171,7 @@ describe('parse', function () {
     }]);
   });
 
-  it('should extract module from correct scope', function () {
+  it('should extract module from same scope', function () {
     var source =
     "var mod = angular.module('bad-test', []);" +
     "(function () {" +
@@ -178,6 +180,42 @@ describe('parse', function () {
     "     var mod = 15;" +
     "   });" +
     "}())";
+
+    var units = parse(source);
+
+    assert.lengthOf(units, 1);
+    assert.sameDeepMembers(units, [{
+      type: 'controller',
+      name: 'TestController',
+      module: 'test',
+      deps: ['$scope']
+    }]);
+  });
+
+  it('should extract module from parent scope', function () {
+    var source =
+    "var mod = angular.module('test', []);" +
+    "(function () {" +
+    "   mod.controller('TestController', function ($scope) {});" +
+    "}())";
+
+    var units = parse(source);
+
+    assert.lengthOf(units, 1);
+    assert.sameDeepMembers(units, [{
+      type: 'controller',
+      name: 'TestController',
+      module: 'test',
+      deps: ['$scope']
+    }]);
+  });
+
+  it('should extract controller from a parent scope', function () {
+    var source =
+    "function TestController($scope) {}" +
+    "(function () {" +
+    "angular.module('test', []).controller('TestController', TestController);" +
+    "}());";
 
     var units = parse(source);
 

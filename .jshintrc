@@ -1,3 +1,7 @@
 {
+  // http://jshint.com/docs/options/
+
+  "undef": true,
+  "unused": true,
   "node": true
 }

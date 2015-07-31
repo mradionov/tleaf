@@ -12,6 +12,8 @@ var TYPES = [
 
 function parse(source) {
 
+  // TODO: can throw exceptions because of bad code
+  // consider re-throwing it, do not use promises or callbacks, keep it sync
   var ast = esprima.parse(source);
   var scopeManager = escope.analyze(ast);
 
@@ -54,8 +56,6 @@ function parse(source) {
 
   calls.forEach(function (call) {
 
-    var callExpression = call.node, scope = call.node;
-
     units.push({
       name: findName(call.node, call.scope),
       type: 'controller',
@@ -68,7 +68,7 @@ function parse(source) {
   return units;
 }
 
-function findName(callExpression, scope) {
+function findName(callExpression) {
   var name;
 
   var nameArg = callExpression.arguments[0] || {};
@@ -80,7 +80,6 @@ function findName(callExpression, scope) {
 }
 
 // TODO: is "module" a reserved word in node.js? is it safe to use? if scoped?
-// TODO: parent scope
 // TODO: multiple variable definitions
 function findModule(callExpression, scope) {
   var module;
@@ -100,12 +99,17 @@ function findModule(callExpression, scope) {
     } else if (_.contains(TYPES, callExpression.callee.property.name)) {
 
       var varName = callExpression.callee.object.name;
-      var variable = _.findWhere(scope.variables, { name: varName });
-      if (variable) {
+      var variable;
+      var currentScope = scope;
 
+      while (!variable && currentScope) {
+        variable = _.findWhere(currentScope.variables, { name: varName });
+        currentScope = currentScope.upper;
+      }
+
+      if (variable) {
         var varNode = _.first(variable.defs).node;
         module = varNode.init.arguments[0].value;
-
       }
 
     }
@@ -115,7 +119,6 @@ function findModule(callExpression, scope) {
   return module;
 }
 
-// TODO: parent scope
 // TODO: multiple variable definitions
 function findDeps(callExpression, scope) {
   var deps = [];
@@ -129,7 +132,13 @@ function findDeps(callExpression, scope) {
   } else if (depsArg.type === 'Identifier') {
 
     var varName = depsArg.name;
-    var variable = _.findWhere(scope.variables, { name: varName });
+    var variable;
+    var currentScope = scope;
+
+    while (!variable && currentScope) {
+      variable = _.findWhere(currentScope.variables, { name: varName });
+      currentScope = currentScope.upper;
+    }
 
     if (variable) {
 
