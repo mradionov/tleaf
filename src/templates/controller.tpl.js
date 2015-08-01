@@ -33,6 +33,4 @@ describe('Controller: {{ name }}', function () {
 
   });
 
-  ////////
-
 });

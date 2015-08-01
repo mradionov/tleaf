@@ -45,6 +45,4 @@ describe('Directive: {{ name }}', function () {
     });
   });
 
-  ////////
-
 });

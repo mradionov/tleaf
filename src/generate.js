@@ -32,6 +32,7 @@ env.addFilter('dashCase', dashCase);
 // TODO: generate helper properties
 // TODO: inject config
 // TODO: try to simplify templates to remove logic completely
+// TODO: support coffee templates
 function generate(template, data) {
 
   var result = env.renderString(template, data);

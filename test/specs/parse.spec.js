@@ -240,4 +240,64 @@ describe('parse', function () {
     }]);
   });
 
+  it('should extract a service', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".service('TestService', function ($http) {});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'service',
+      name: 'TestService',
+      module: { name: 'test' },
+      deps: [{ name: '$http' }]
+    }]);
+  });
+
+  it('should extract directive', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".directive('TestDirective', function ($interval) {});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'directive',
+      name: 'TestDirective',
+      module: { name: 'test' },
+      deps: [{ name: '$interval' }]
+    }]);
+  });
+
+  it('should extract filter', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".filter('testFilter', function () {});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'filter',
+      name: 'testFilter',
+      module: { name: 'test' },
+      deps: []
+    }]);
+  });
+
+  it('should not extract filter args as deps', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".filter('testFilter', function (string, count) {});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'filter',
+      name: 'testFilter',
+      module: { name: 'test' },
+      deps: []
+    }]);
+  });
+
 });

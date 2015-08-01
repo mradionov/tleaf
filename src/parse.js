@@ -59,12 +59,23 @@ function parse(source) {
 
   calls.forEach(function (call) {
 
-    units.unshift({
-      name: findName(call.node, call.scope),
-      type: findType(call.node, call.scope),
-      module: findModule(call.node, call.scope),
-      deps: findDeps(call.node, call.scope)
-    });
+    var name = findName(call.node, call.scope);
+    var type = findType(call.node, call.scope);
+    var module = findModule(call.node, call.scope);
+    var deps = [];
+
+    if (type !== 'filter') {
+      deps = findDeps(call.node, call.scope);
+    }
+
+    var unit = {
+      name: name,
+      type: type,
+      module: module,
+      deps: deps
+    };
+
+    units.unshift(unit);
 
   });
 

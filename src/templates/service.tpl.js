@@ -47,6 +47,4 @@ describe('Service: {{ name }}', function () {
     httpBackend.verifyNoOutstandingRequest();
   });
 
-  ////////
-
 });
