@@ -1,4 +1,5 @@
-describe('Service: {{ unit.name }}', function () { 'use strict';
+// TODO: mockData?
+describe('Service: {{ name }}', function () {
 
   var httpBackend;
 
@@ -12,11 +13,11 @@ describe('Service: {{ unit.name }}', function () { 'use strict';
 
   // Use to inject the code under test
   function _inject() {
-    inject(function ($httpBackend{{ unit.deps | pluck('name') | toarg(true, '_')}}) {
+    inject(function ($httpBackend{{ deps | ljoined }}) {
       httpBackend = $httpBackend;
 
-      {% for dep in unit.deps -%}
-      {{ dep.name }} = _{{ dep.name }}_;
+      {% for dep in deps -%}
+      {{ dep }} = _{{ dep }}_;
       {% endfor %}
     });
   }
@@ -25,8 +26,8 @@ describe('Service: {{ unit.name }}', function () { 'use strict';
   function _setup() {
     // Mock any expected data
     _provide(function (provide) {
-      {%- for dep in unit.deps %}
-      provide.value('{{ dep.name }}', {});
+      {%- for dep in deps %}
+      provide.value('{{ dep }}', {});
       {%- endfor %}
     });
 
@@ -36,7 +37,7 @@ describe('Service: {{ unit.name }}', function () { 'use strict';
 
   beforeEach(function () {
     // Load the service's module
-    module('{{ unit.module.name }}')
+    module('{{ module }}')
   });
 
   // make sure no expectations were missed in your tests.

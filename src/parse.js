@@ -7,6 +7,8 @@ var esprima = require('esprima'),
 
 var TYPES = [
   'controller',
+  'directive',
+  'filter',
   'service'
 ];
 

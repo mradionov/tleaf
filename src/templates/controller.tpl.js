@@ -1,31 +1,32 @@
-describe('Controller: {{ unit.name }}', function () { 'use strict';
+// TODO: mock service?
+// TODO: controller as
+describe('Controller: {{ name }}', function () {
 
-  var scope, {{ unit.name }}{{ unit.deps | pluck('name') | toarg(true) }};
+  var scope, {{ name }}{{ deps | ljoined }};
 
   // Initialize the controller and scope
   beforeEach(function () {
 
     // Load the controller's module
-    module('{{ unit.module.name }}');
+    module('{{ module }}');
 
     // Provide any mocks needed
     module(function ($provide) {
-
-      {%- for dep in unit.deps %}
-      $provide.value('{{ dep.name }}', {});
+      {%- for dep in deps %}
+      $provide.value('{{ dep }}', {});
       {%- endfor %}
     });
 
     // Inject in angular constructs otherwise,
     //  you would need to inject these into each test
-    inject(function ($controller{{ unit.deps | pluck('name') | toarg(true, '_')}}) {
+    inject(function ($controller{{ _deps_ | ljoined }}) {
       scope = {};
 
-      {% for dep in unit.deps -%}
-      {{ dep.name }} = _{{ dep.name }}_;
+      {% for dep in deps -%}
+      {{ dep }} = _{{ dep }}_;
       {% endfor %}
 
-      {{unit.name}} = $controller('{{unit.name}}', {
+      {{name}} = $controller('{{name}}', {
         $scope: scope
       });
     });

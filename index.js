@@ -7,6 +7,7 @@ var parse = require('./src/parse'),
     ask = require('./src/ask'),
     identify = require('./src/identify'),
     cache = require('./src/cache'),
+    serialize = require('./src/serialize'),
     generate = require('./src/generate');
 
 ////////
@@ -77,7 +78,9 @@ function depsFn(unit) {
 
   var template = fs.readFileSync(templatePath, 'utf-8');
 
-  var output = generate(template, unit);
+  var data = serialize(unit);
+
+  var output = generate(template, data);
 
   fs.writeFileSync(outputPath, output);
 

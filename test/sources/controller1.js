@@ -12,6 +12,9 @@
     })
     .service('MyService1', function ($http, MyService2) {
 
+    })
+    .directive('MyDir1', function (MyService1) {
+
     });
 
 }());
