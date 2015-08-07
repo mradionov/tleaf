@@ -1,6 +1,8 @@
 'use strict';
 
 var fs = require('fs'),
+    path = require('path'),
+    ncp = require('ncp'),
     _ = require('lodash');
 
 var parse = require('./src/parse'),
@@ -14,6 +16,55 @@ var parse = require('./src/parse'),
 
 var args = process.argv.slice(2);
 
+if (!args.length) {
+  console.log('USAGE:');
+  console.log('\tinit /path/to/folder');
+  console.log('\tcurrent');
+  console.log('\t/path/to/source.js /path/to/output.spec.js');
+  return;
+}
+
+switch (args[0]) {
+case 'init':
+  // TODO: default path and name
+  var defaultsPath = './src/defaults';
+  var configFileName = 'config.js';
+  var initPath = args[1];
+
+  ncp(defaultsPath, initPath, function (err) {
+    if (err) { return console.error(err); }
+  });
+
+  var useDir = path.resolve(initPath);
+  var usePath = path.join(useDir, configFileName);
+
+  cache.set('use', usePath);
+  return;
+
+case 'use':
+  var usePath = path.resolve(args[1]);
+
+  if (!fs.existsSync(usePath)) {
+    console.error('Config file not found');
+    return false;
+  }
+
+  cache.set('use', usePath);
+  return;
+
+case 'current':
+
+  var usePath = cache.get('use');
+  if (usePath) {
+    console.log('Current config path: %s', usePath);
+  } else {
+    console.log('Using default config');
+  }
+  return;
+
+default:
+}
+
 if (args.length < 2) {
   console.error('Specify pass to a source file and to destination file');
   return false;
@@ -21,7 +72,6 @@ if (args.length < 2) {
 
 var sourcePath = args[0];
 var outputPath = args[1];
-
 
 if (!fs.existsSync(sourcePath)) {
   console.error('Source file not found');
@@ -55,7 +105,7 @@ function unitFn(unit) {
 
     ask.deps(deps.unknown, function (identified) {
 
-      cache(identified);
+      cache.set('deps', identified);
 
       unit.deps = deps.known.concat(identified);
 
@@ -69,11 +119,26 @@ function unitFn(unit) {
 
 function depsFn(unit) {
 
-  var templatePath = './src/templates/' + unit.type + '.tpl.js';
+  var unitFileName = unit.type + '.tpl.js';
 
-  if (!fs.existsSync(templatePath)) {
-    console.error('Template is missing for type "%s"', unit.type);
-    return false;
+  var defaultTemplateDir = './src/defaults/templates/';
+
+  var templatePath = path.join(defaultTemplateDir, unitFileName);
+
+  var usePath = cache.get('use');
+  if (usePath) {
+
+    var useDir = path.dirname(usePath);
+    var useTemplateDir = path.join(useDir, 'templates');
+    var useTemplatePath = path.join(useTemplateDir, unitFileName);
+
+    if (fs.existsSync(useTemplatePath)) {
+      templatePath = useTemplatePath;
+    } else {
+      console.error('Custom template is missing for type "%s"', unit.type);
+      console.error('Falling back default template');
+    }
+
   }
 
   var template = fs.readFileSync(templatePath, 'utf-8');

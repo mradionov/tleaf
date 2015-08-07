@@ -1,25 +1,45 @@
 'use strict';
 
 var fs = require('fs');
+var _ = require('lodash');
 
 var cachePath = __dirname + '/../test/cache.json';
 
-function cache(deps) {
-
-  var data = '';
-
-  if (fs.existsSync(cachePath)) {
-    data = JSON.parse(fs.readFileSync(cachePath).toString());
-
-    data = data.concat(deps);
-
-    data = JSON.stringify(data);
-
-  } else {
-    data = JSON.stringify(deps);
-  }
-
-  fs.appendFileSync(cachePath, data, { flag: 'w' });
-}
+var cache = {
+  set: set,
+  get: get
+};
 
 module.exports = cache;
+
+////////
+
+var data;
+
+function set(path, value) {
+  data = data || load();
+  _.set(data, path, value);
+  save(data);
+}
+
+function get(path, defaultValue) {
+  data = data || load();
+  var value = _.get(data, path);
+  return _.isUndefined(value) ? defaultValue : value;
+}
+
+function load() {
+  if (!fs.existsSync(cachePath)) {
+    return {};
+  }
+
+  var serialized = fs.readFileSync(cachePath, 'utf8');
+  var obj = JSON.parse(serialized);
+
+  return obj;
+}
+
+function save(obj) {
+  var serialized = JSON.stringify(obj);
+  fs.appendFileSync(cachePath, serialized, { flag: 'w' });
+}

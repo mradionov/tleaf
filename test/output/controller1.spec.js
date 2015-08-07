@@ -1,47 +1,39 @@
-describe('Directive: MyDir1', function () {
-  var element, scope, compile, defaultData,
-      validTemplate = '<my-dir-1 ng-model="data"></my-dir-1>';
+// TODO: mock service?
+// TODO: controller as
+describe('Controller: FirstCtrl', function () {
 
-  function createDirective(data, template) {
-    var elm;
+  var scope, FirstCtrl, $scope, $state, MyService1, MyService2;
 
-    // Setup scope state
-    scope.data = data || defaultData;
-
-    // Create directive
-    elm = compile(template || validTemplate)(scope);
-
-    // Trigger watchers
-    //scope.$apply();
-
-    // Return
-    return elm;
-  }
-
+  // Initialize the controller and scope
   beforeEach(function () {
 
-    // Load the directive's module
+    // Load the controller's module
     module('app');
-
-    // Reset data each time
-    defaultData = 42;
 
     // Provide any mocks needed
     module(function ($provide) {
-      provide.value('MyService1', {});
+      $provide.value('$scope', {});
+      $provide.value('$state', {});
+      $provide.value('MyService1', {});
+      $provide.value('MyService2', {});
     });
 
     // Inject in angular constructs otherwise,
     //  you would need to inject these into each test
-    inject(function ($rootScope, $compile, _MyService1_) {
-      scope = $rootScope.$new();
-      compile = $compile;
+    inject(function ($controller, _$scope_, _$state_, _MyService1_, _MyService2_) {
+      scope = {};
 
+      $scope = _$scope_;
+      $state = _$state_;
       MyService1 = _MyService1_;
+      MyService2 = _MyService2_;
       
-    });
-  });
 
-  ////////
+      FirstCtrl = $controller('FirstCtrl', {
+        $scope: scope
+      });
+    });
+
+  });
 
 });

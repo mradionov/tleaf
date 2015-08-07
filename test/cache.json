@@ -1,1 +1,1 @@
-[{"name":"MyService2","type":"service"},{"name":"$state","type":"provider"},{"name":"MyService1","type":"service"}]
+{"use":"/home/rd/tlef/config.js","deps":[{"name":"$state","type":"provider"},{"name":"MyService1","type":"service"},{"name":"MyService2","type":"service"}]}

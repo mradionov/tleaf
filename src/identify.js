@@ -3,7 +3,7 @@
 var fs = require('fs');
 var _ = require('lodash');
 
-var cachePath = __dirname + '/../test/cache.json';
+var cache = require('./cache');
 
 function identify(all) {
 
@@ -23,16 +23,15 @@ function identify(all) {
     return deps;
   }
 
+  var depsCache = cache.get('deps', []);
 
-  if (!fs.existsSync(cachePath)) {
+  if (!depsCache.length) {
     deps.unknown = filtered;
     return deps;
   }
 
-  var cache = JSON.parse(fs.readFileSync(cachePath).toString());
-
   filtered.forEach(function (dep) {
-    var found = _.find(cache, { name: dep.name });
+    var found = _.find(depsCache, { name: dep.name });
     if (found) {
       deps.known.push({
         name: dep.name,
