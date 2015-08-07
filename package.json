@@ -1,14 +1,14 @@
 {
-  "name": "jungler",
+  "name": "tleaf",
   "version": "0.0.0",
-  "description": "AngularJS Jasmine test generator",
+  "description": "AngularJS unit test generator",
   "main": "index.js",
   "author": "Michael Radionov (https://github.com/mradionov)",
   "license": "MIT",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/mradionov/jungler"
+    "url": "https://github.com/mradionov/tleaf"
   },
   "dependencies": {
     "escope": "^3.2.0",
