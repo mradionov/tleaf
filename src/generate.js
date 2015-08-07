@@ -33,9 +33,22 @@ env.addFilter('dashCase', dashCase);
 // TODO: inject config
 // TODO: try to simplify templates to remove logic completely
 // TODO: support coffee templates
-function generate(template, data) {
+function generate(template, data, options) {
+  options = _.defaults(options || {}, {
+    indent: '\t'
+  });
 
   var result = env.renderString(template, data);
+
+
+  var indent = options.indent;
+  if (_.isNumber(options.indent)) {
+    indent = _.repeat(' ', options.indent);
+  }
+
+  if (indent !== '\t') {
+    result = result.replace(/\t/g, indent);
+  }
 
   return result;
 }

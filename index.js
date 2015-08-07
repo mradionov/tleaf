@@ -12,6 +12,8 @@ var parse = require('./src/parse'),
     serialize = require('./src/serialize'),
     generate = require('./src/generate');
 
+var defaultConfig = require('./src/defaults/config');
+
 ////////
 
 var args = process.argv.slice(2);
@@ -70,8 +72,18 @@ if (args.length < 2) {
   return false;
 }
 
+
+
 var sourcePath = args[0];
 var outputPath = args[1];
+var useConfigPath = cache.get('use');
+var config;
+if (useConfigPath && fs.existsSync(useConfigPath)) {
+    var useConfig = require(useConfigPath);
+    config = _.defaults({}, useConfig, defaultConfig);
+} else {
+  config = defaultConfig;
+}
 
 if (!fs.existsSync(sourcePath)) {
   console.error('Source file not found');
@@ -145,7 +157,11 @@ function depsFn(unit) {
 
   var data = serialize(unit);
 
-  var output = generate(template, data);
+  var options = {
+    indent: config.indent
+  };
+
+  var output = generate(template, data, options);
 
   fs.writeFileSync(outputPath, output);
 
