@@ -1,4 +1,3 @@
-// TODO: mockData?
 describe('Service: {{name}}', function () {
 
 	var httpBackend;

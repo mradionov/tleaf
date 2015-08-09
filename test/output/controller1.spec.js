@@ -1,48 +1,24 @@
-// TODO: mockData?
-describe('Service: MyService1', function () {
+describe('Factory: MyFactory1', function () {
+	var MyFactory1;
 
-	var httpBackend;
+	beforeEach(function () {
+		// Load factory's module
+		module('app');
 
-	// Use to provide any mocks needed
-	function _provide(callback) {
-		// Execute callback with $provide
+		// Provide any mocks needed
 		module(function ($provide) {
-			callback($provide);
-		});
-	}
-
-	// Use to inject the code under test
-	function _inject() {
-		inject(function ($httpBackend, _MyService2_) {
-			httpBackend = $httpBackend;
-
-			MyService2 = _MyService2_;
-		});
-	}
-
-	// Call this before each test, except where you are testing for errors
-	function _setup() {
-		// Mock any expected data
-		_provide(function (provide) {
-			provide.service('MyService2', function () {
+			$provide.service('MyService1', function () {
 			
 			});
 		});
 
-		// Inject the code under test
-		_inject();
-	}
+		// Inject in anuglar constructs otherwise,
+		//	you would need to inject these into each test
+		inject(function (_MyFactory1_, _MyService1_) {
+			MyFactory1 = _MyFactory1_;
 
-	beforeEach(function () {
-		// Load the service's module
-		module('app')
-	});
-
-	// make sure no expectations were missed in your tests.
-	// (e.g. expectGET or expectPOST)
-	afterEach(function () {
-		httpBackend.verifyNoOutstandingExpectation();
-		httpBackend.verifyNoOutstandingRequest();
+			MyService1 = _MyService1_;
+		});
 	});
 
 });

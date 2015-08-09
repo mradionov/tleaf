@@ -1,5 +1,3 @@
-// TODO: mock service?
-// TODO: controller as
 describe('Controller: {{name}}', function () {
 
 	var scope, {{name}}{{and arg.deps}};

@@ -17,6 +17,8 @@ function serialize(unit) {
   };
 
   data.name = unit.name;
+  data._name_ = wrap(unit.name);
+
   data.module = unit.module.name;
 
   data.deps = _.map(unit.deps, function (unitDep) {

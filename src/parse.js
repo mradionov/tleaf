@@ -9,7 +9,8 @@ var TYPES = [
   'controller',
   'directive',
   'filter',
-  'service'
+  'service',
+  'factory'
 ];
 
 
