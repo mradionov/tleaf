@@ -1,5 +1,5 @@
 // TODO: mockData?
-describe('Service: {{ name }}', function () {
+describe('Service: {{name}}', function () {
 
 	var httpBackend;
 
@@ -13,12 +13,12 @@ describe('Service: {{ name }}', function () {
 
 	// Use to inject the code under test
 	function _inject() {
-		inject(function ($httpBackend{{ deps | ljoined }}) {
+		inject(function ($httpBackend{{and arg._deps_}}) {
 			httpBackend = $httpBackend;
 
-			{% for dep in deps -%}
-			{{ dep }} = _{{ dep }}_;
-			{% endfor %}
+			{{#each deps}}
+			{{this.name}} = _{{this.name}}_;
+			{{/each}}
 		});
 	}
 
@@ -26,9 +26,9 @@ describe('Service: {{ name }}', function () {
 	function _setup() {
 		// Mock any expected data
 		_provide(function (provide) {
-			{%- for dep in deps %}
-			provide.value('{{ dep }}', {});
-			{%- endfor %}
+			{{#each deps}}
+			{{> (this.getType) this provide='provide'}}
+			{{/each}}
 		});
 
 		// Inject the code under test
@@ -37,7 +37,7 @@ describe('Service: {{ name }}', function () {
 
 	beforeEach(function () {
 		// Load the service's module
-		module('{{ module }}')
+		module('{{module}}')
 	});
 
 	// make sure no expectations were missed in your tests.

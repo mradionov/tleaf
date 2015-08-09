@@ -2,6 +2,13 @@
 
 var _ = require('lodash');
 
+
+function wrap(string, wrapper) {
+  wrapper = wrapper || '_';
+  return wrapper + string + wrapper;
+}
+
+
 // TODO: decide whether should recreate unit if it is bad or throw errors
 function serialize(unit) {
 
@@ -11,16 +18,26 @@ function serialize(unit) {
 
   data.name = unit.name;
   data.module = unit.module.name;
-  data.deps = _.pluck(unit.deps, 'name');
-  data._deps_ = _.map(unit.deps, function (dep) {
-    return '_' + dep.name + '_';
+
+  data.deps = _.map(unit.deps, function (unitDep) {
+
+    // copy not to modify dep in unit
+    var dep = _.merge({}, unitDep);
+
+    dep._name_ = wrap(dep.name);
+
+    dep.getType = function () {
+      return this.type;
+    };
+
+    return dep;
   });
 
-  // TODO ?
-  // depsArg or arg.deps
-  // andDepsArg or and.arg.deps
-  // _depsArg_ or _arg.deps_ or arg._deps_
-  // _andDepsArg_ or _and.arg.deps_ or and.arg._deps_
+  data.arg = {};
+  data.arg.deps = _.pluck(unit.deps, 'name');
+  data.arg._deps_ = _.map(unit.deps, function (dep) {
+    return wrap(dep.name);
+  });
 
   return data;
 }

@@ -1,39 +1,48 @@
-// TODO: mock service?
-// TODO: controller as
-describe('Controller: FirstCtrl', function () {
+// TODO: mockData?
+describe('Service: MyService1', function () {
 
-	var scope, FirstCtrl, $scope, $state, MyService1, MyService2;
+	var httpBackend;
 
-	// Initialize the controller and scope
-	beforeEach(function () {
-
-		// Load the controller's module
-		module('app');
-
-		// Provide any mocks needed
+	// Use to provide any mocks needed
+	function _provide(callback) {
+		// Execute callback with $provide
 		module(function ($provide) {
-			$provide.value('$scope', {});
-			$provide.value('$state', {});
-			$provide.value('MyService1', {});
-			$provide.value('MyService2', {});
+			callback($provide);
 		});
+	}
 
-		// Inject in angular constructs otherwise,
-		//	you would need to inject these into each test
-		inject(function ($controller, _$scope_, _$state_, _MyService1_, _MyService2_) {
-			scope = {};
+	// Use to inject the code under test
+	function _inject() {
+		inject(function ($httpBackend, _MyService2_) {
+			httpBackend = $httpBackend;
 
-			$scope = _$scope_;
-			$state = _$state_;
-			MyService1 = _MyService1_;
 			MyService2 = _MyService2_;
-			
+		});
+	}
 
-			FirstCtrl = $controller('FirstCtrl', {
-				$scope: scope
+	// Call this before each test, except where you are testing for errors
+	function _setup() {
+		// Mock any expected data
+		_provide(function (provide) {
+			provide.service('MyService2', function () {
+			
 			});
 		});
 
+		// Inject the code under test
+		_inject();
+	}
+
+	beforeEach(function () {
+		// Load the service's module
+		module('app')
+	});
+
+	// make sure no expectations were missed in your tests.
+	// (e.g. expectGET or expectPOST)
+	afterEach(function () {
+		httpBackend.verifyNoOutstandingExpectation();
+		httpBackend.verifyNoOutstandingRequest();
 	});
 
 });

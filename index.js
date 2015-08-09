@@ -111,6 +111,8 @@ function unitFn(unit) {
 
   if (!deps.unknown.length) {
 
+    unit.deps = deps.known;
+
     depsFn(unit);
 
   } else {

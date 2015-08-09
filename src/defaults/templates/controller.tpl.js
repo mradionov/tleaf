@@ -1,30 +1,29 @@
 // TODO: mock service?
 // TODO: controller as
-describe('Controller: {{ name }}', function () {
+describe('Controller: {{name}}', function () {
 
-	var scope, {{ name }}{{ deps | ljoined }};
+	var scope, {{name}}{{and arg.deps}};
 
 	// Initialize the controller and scope
 	beforeEach(function () {
 
 		// Load the controller's module
-		module('{{ module }}');
+		module('{{module}}');
 
-		// Provide any mocks needed
 		module(function ($provide) {
-			{%- for dep in deps %}
-			$provide.value('{{ dep }}', {});
-			{%- endfor %}
+			{{#each deps}}
+			{{> (this.getType) this}}
+			{{/each}}
 		});
 
 		// Inject in angular constructs otherwise,
 		//	you would need to inject these into each test
-		inject(function ($controller{{ _deps_ | ljoined }}) {
+		inject(function ($controller{{and arg._deps_}}) {
 			scope = {};
 
-			{% for dep in deps -%}
-			{{ dep }} = _{{ dep }}_;
-			{% endfor %}
+			{{#each deps}}
+			{{this.name}} = _{{this.name}}_;
+			{{/each}}
 
 			{{name}} = $controller('{{name}}', {
 				$scope: scope
@@ -32,5 +31,4 @@ describe('Controller: {{ name }}', function () {
 		});
 
 	});
-
 });

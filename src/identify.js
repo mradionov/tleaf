@@ -18,13 +18,7 @@ function identify(all) {
     return !_.contains(exclude, dep.name);
   });
 
-  if (!filtered.length) {
-    deps.known = filtered;
-    return deps;
-  }
-
   var depsCache = cache.get('deps', []);
-
   if (!depsCache.length) {
     deps.unknown = filtered;
     return deps;

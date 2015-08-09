@@ -1,25 +1,25 @@
-describe('Filter: {{ name }}', function () {
-	var {{ name }};
+describe('Filter: {{name}}', function () {
+	var {{name}};
 
 	beforeEach(function () {
 		// Load the filters's module
-		module('{{ module }}');
+		module('{{module}}');
 
 		// Provide any mocks needed
 		module(function ($provide) {
-			{%- for dep in deps %}
-			provide.value('{{ dep }}', {});
-			{%- endfor %}
+			{{#each deps}}
+			{{> (this.getType) this}}
+			{{/each}}
 		});
 
 		// Inject in angular constructs otherwise,
 		//	you would need to inject these into each test
-		inject(function ($filter{{ _deps_ | ljoined }}) {
-			{{ name }} = $filter('{{ name }}');
+		inject(function ($filter{{and arg._deps_ }}) {
+			{{name}} = $filter('{{name}}');
 
-			{% for dep in deps -%}
-			{{ dep }} = _{{ dep }}_;
-			{% endfor %}
+			{{#each deps}}
+			{{this.name}} = _{{this.name}}_;
+			{{/each}}
 		});
 	});
 

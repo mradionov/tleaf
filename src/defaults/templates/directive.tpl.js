@@ -1,6 +1,6 @@
-describe('Directive: {{ name }}', function () {
+describe('Directive: {{name}}', function () {
 	var element, scope, compile, defaultData,
-			validTemplate = '<{{ name | dashCase }} ng-model="data"></{{ name | dashCase }}>';
+			validTemplate = '<{{dashCase name}} ng-model="data"></{{dashCase name}}>';
 
 	function createDirective(data, template) {
 		var elm;
@@ -21,27 +21,27 @@ describe('Directive: {{ name }}', function () {
 	beforeEach(function () {
 
 		// Load the directive's module
-		module('{{ module }}');
+		module('{{module}}');
 
 		// Reset data each time
 		defaultData = 42;
 
 		// Provide any mocks needed
 		module(function ($provide) {
-			{%- for dep in deps %}
-			provide.value('{{ dep }}', {});
-			{%- endfor %}
+			{{#each deps}}
+			{{> (this.getType) this}}
+			{{/each}}
 		});
 
 		// Inject in angular constructs otherwise,
 		//	you would need to inject these into each test
-		inject(function ($rootScope, $compile{{ _deps_ | ljoined }}) {
+		inject(function ($rootScope, $compile{{and  arg._deps_ }}) {
 			scope = $rootScope.$new();
 			compile = $compile;
 
-			{% for dep in deps -%}
-			{{ dep }} = _{{ dep }}_;
-			{% endfor %}
+			{{#each deps}}
+			{{this.name}} = _{{this.name}}_;
+			{{/each}}
 		});
 	});
 
