@@ -10,7 +10,8 @@ var TYPES = [
   'directive',
   'filter',
   'service',
-  'factory'
+  'factory',
+  'provider'
 ];
 
 
@@ -63,11 +64,7 @@ function parse(source) {
     var name = findName(call.node, call.scope);
     var type = findType(call.node, call.scope);
     var module = findModule(call.node, call.scope);
-    var deps = [];
-
-    if (type !== 'filter') {
-      deps = findDeps(call.node, call.scope);
-    }
+    var deps = findDeps(call.node, call.scope, type);
 
     var unit = {
       name: name,
@@ -141,16 +138,33 @@ function findModule(callExpression, scope) {
 }
 
 // TODO: multiple variable definitions
-function findDeps(callExpression, scope) {
+function findDeps(callExpression, scope, type) {
+
   var deps = [];
 
+  // filter can't have dependenices
+  if (type === 'filter') {
+    return [];
+  }
+
   var depsArg = callExpression.arguments[1] || {};
+
+  //
 
   if (depsArg.type === 'ArrayExpression') {
 
     depsArg = _.last(depsArg.elements) || {};
 
-  } else if (depsArg.type === 'Identifier') {
+    if (depsArg.type === 'FunctionExpression') {
+      deps = extractDeps(depsArg.params);
+      return deps;
+    }
+
+  }
+
+  //
+
+  if (depsArg.type === 'Identifier') {
 
     var varName = depsArg.name;
     var variable;
@@ -172,27 +186,106 @@ function findDeps(callExpression, scope) {
         params = varNode.init.params;
       }
 
-      params.forEach(function (param) {
-        if (param.type === 'Identifier') {
-          deps.push({
-            name: param.name
-          });
-        }
-      });
-
+      deps = extractDeps(params);
+      return deps;
     }
 
   }
 
+  //
+
   if (depsArg.type === 'FunctionExpression') {
-    depsArg.params.forEach(function (param) {
-      if (param.type === 'Identifier') {
-        deps.push({
-          name: param.name
-        });
-      }
-    });
+
+    if (type !== 'provider') {
+      deps = extractDeps(depsArg.params);
+      return deps;
+    }
+
+    if (depsArg.body.type === 'BlockStatement') {
+
+      debugger;
+
+
+
+      var bodyExpressions = depsArg.body.body;
+
+      // debugger;
+
+      bodyExpressions.some(function (bodyExpression) {
+
+        if (bodyExpression.type === 'ExpressionStatement' &&
+            bodyExpression.expression.left.property.name === '$get'
+        ) {
+
+          if (bodyExpression.expression.right.type === 'FunctionExpression') {
+            deps = extractDeps(bodyExpression.expression.right.params);
+            return true;
+          }
+
+          if (bodyExpression.expression.right.type === 'Identifier') {
+
+            var varName = bodyExpression.expression.right.name;
+            var variable;
+            var currentScope = scope;
+
+            while (!variable && currentScope) {
+              variable = _.findWhere(currentScope.variables, { name: varName });
+              currentScope = currentScope.upper;
+            }
+
+            debugger;
+
+            if (variable) {
+
+              var varNode = _.first(variable.defs).node;
+
+              debugger;
+
+            }
+
+
+          }
+
+
+        } else if (bodyExpression.type === 'ReturnStatement' &&
+          bodyExpression.argument.type === 'ObjectExpression'
+        ) {
+
+          var properties = bodyExpression.argument.properties;
+          var fn = _.find(properties, function (property) {
+            return property.key.name === '$get';
+          });
+
+          if (fn && fn.value.type === 'FunctionExpression') {
+            deps = extractDeps(fn.value.params);
+            return true;
+          }
+
+        }
+
+      });
+
+      return deps;
+    }
+
   }
+
+  return deps;
+}
+
+function extractDeps(params) {
+  var deps = [];
+
+  params.forEach(function (param) {
+    if (param.type === 'Identifier') {
+
+      var dep = {
+        name: param.name
+      };
+
+      deps.push(dep);
+    }
+  });
 
   return deps;
 }

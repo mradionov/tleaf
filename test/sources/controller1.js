@@ -18,6 +18,9 @@
     })
     .directive('MyDir1', function (MyService1) {
 
+    })
+    .provider('MyProvider', function () {
+        this.$get = function (MyService1) {};
     });
 
 }());

@@ -300,4 +300,99 @@ describe('parse', function () {
     }]);
   });
 
+  it('should extract provider deps from this', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".provider('testProvider', function () {" +
+    " this.foo = 'bar';" +
+    " this.$get = function ($rootScope) {};" +
+    "});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'provider',
+      name: 'testProvider',
+      module: { name: 'test' },
+      deps: [{ name: '$rootScope' }]
+    }]);
+  });
+
+  it.only('should extract provider deps from this variable', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".provider('testProvider', function () {" +
+    " var testGet = function ($rootScope) {};" +
+    " this.$get = testGet;" +
+    "});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'provider',
+      name: 'testProvider',
+      module: { name: 'test' },
+      deps: [{ name: '$rootScope' }]
+    }]);
+  });
+
+  it('should extract provider deps from return object', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".provider('testProvider', function () {" +
+    " return {" +
+    "   $get: function ($rootScope) {}" +
+    " };" +
+    "});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'provider',
+      name: 'testProvider',
+      module: { name: 'test' },
+      deps: [{ name: '$rootScope' }]
+    }]);
+  });
+
+  it('should extract provider deps from return variable', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".provider('testProvider', function () {" +
+    " var service = {" +
+    "   $get: function ($rootScope) {}" +
+    " };" +
+    " return service;" +
+    "});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'provider',
+      name: 'testProvider',
+      module: { name: 'test' },
+      deps: [{ name: '$rootScope' }]
+    }]);
+  });
+
+  it('should extract provider deps from return fn variable', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".provider('testProvider', function () {" +
+    " var foo = function ($rootScope) {};" +
+    " return {" +
+    "   $get: foo" +
+    " };" +
+    "});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'provider',
+      name: 'testProvider',
+      module: { name: 'test' },
+      deps: [{ name: '$rootScope' }]
+    }]);
+  });
+
 });
