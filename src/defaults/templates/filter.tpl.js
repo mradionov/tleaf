@@ -8,7 +8,7 @@ describe('Filter: {{name}}', function () {
 		// Provide any mocks needed
 		module(function ($provide) {
 			{{#each deps}}
-			{{> (this.getType) this}}
+			{{> (this.provider) this}}
 			{{/each}}
 		});
 

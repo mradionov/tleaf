@@ -26,7 +26,7 @@ describe('Service: {{name}}', function () {
 		// Mock any expected data
 		_provide(function (provide) {
 			{{#each deps}}
-			{{> (this.getType) this provide='provide'}}
+			{{> (this.provider) this provide='provide'}}
 			{{/each}}
 		});
 
