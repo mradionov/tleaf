@@ -318,7 +318,7 @@ describe('parse', function () {
     }]);
   });
 
-  it.only('should extract provider deps from this variable', function () {
+  it('should extract provider deps from this variable', function () {
     var source =
     "angular.module('test', [])" +
     ".provider('testProvider', function () {" +

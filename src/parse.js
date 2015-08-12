@@ -117,16 +117,8 @@ function findModule(callExpression, scope) {
     } else if (_.contains(TYPES, callExpression.callee.property.name)) {
 
       var varName = callExpression.callee.object.name;
-      var variable;
-      var currentScope = scope;
-
-      while (!variable && currentScope) {
-        variable = _.findWhere(currentScope.variables, { name: varName });
-        currentScope = currentScope.upper;
-      }
-
-      if (variable) {
-        var varNode = _.first(variable.defs).node;
+      var varNode = findVariable(varName, scope);
+      if (varNode) {
         module.name = varNode.init.arguments[0].value;
       }
 
@@ -167,29 +159,10 @@ function findDeps(callExpression, scope, type) {
   if (depsArg.type === 'Identifier') {
 
     var varName = depsArg.name;
-    var variable;
-    var currentScope = scope;
 
-    while (!variable && currentScope) {
-      variable = _.findWhere(currentScope.variables, { name: varName });
-      currentScope = currentScope.upper;
-    }
+    deps = extractVariableDeps(varName, scope);
 
-    if (variable) {
-
-      var varNode = _.first(variable.defs).node;
-
-      var params = [];
-      if (varNode.type === 'FunctionDeclaration') {
-        params = varNode.params;
-      } else if (varNode.type === 'VariableDeclarator') {
-        params = varNode.init.params;
-      }
-
-      deps = extractDeps(params);
-      return deps;
-    }
-
+    return deps;
   }
 
   //
@@ -202,11 +175,6 @@ function findDeps(callExpression, scope, type) {
     }
 
     if (depsArg.body.type === 'BlockStatement') {
-
-      debugger;
-
-
-
       var bodyExpressions = depsArg.body.body;
 
       // debugger;
@@ -225,40 +193,60 @@ function findDeps(callExpression, scope, type) {
           if (bodyExpression.expression.right.type === 'Identifier') {
 
             var varName = bodyExpression.expression.right.name;
-            var variable;
-            var currentScope = scope;
+            var blockScope = findScope(depsArg);
 
-            while (!variable && currentScope) {
-              variable = _.findWhere(currentScope.variables, { name: varName });
-              currentScope = currentScope.upper;
-            }
-
-            debugger;
-
-            if (variable) {
-
-              var varNode = _.first(variable.defs).node;
-
-              debugger;
-
-            }
-
-
+            deps = extractVariableDeps(varName, blockScope);
+            return true;
           }
 
+        } else if (bodyExpression.type === 'ReturnStatement') {
 
-        } else if (bodyExpression.type === 'ReturnStatement' &&
-          bodyExpression.argument.type === 'ObjectExpression'
-        ) {
+          if (bodyExpression.argument.type === 'ObjectExpression') {
+            var properties = bodyExpression.argument.properties;
+            var fn = _.find(properties, function (property) {
+              return property.key.name === '$get';
+            });
 
-          var properties = bodyExpression.argument.properties;
-          var fn = _.find(properties, function (property) {
-            return property.key.name === '$get';
-          });
+            if (fn) {
+              if (fn.value.type === 'FunctionExpression') {
 
-          if (fn && fn.value.type === 'FunctionExpression') {
-            deps = extractDeps(fn.value.params);
-            return true;
+                deps = extractDeps(fn.value.params);
+                return true;
+
+              } else if (fn.value.type === 'Identifier') {
+
+                var varName = fn.value.name;
+                var blockScope = findScope(depsArg);
+
+                deps = extractVariableDeps(varName, blockScope);
+
+                return true;
+              }
+            }
+
+          } else if (bodyExpression.argument.type === 'Identifier') {
+
+            var varName = bodyExpression.argument.name;
+            var blockScope = findScope(depsArg);
+
+            var varNode = findVariable(varName, blockScope);
+            if (varNode) {
+
+              if (varNode.init.type === 'ObjectExpression') {
+                var properties = varNode.init.properties;
+                var fn = _.find(properties, function (property) {
+                  return property.key.name === '$get';
+                });
+
+                if (fn && fn.value.type === 'FunctionExpression') {
+                  deps = extractDeps(fn.value.params);
+                  return true;
+                }
+
+              }
+
+            }
+
           }
 
         }
@@ -272,6 +260,8 @@ function findDeps(callExpression, scope, type) {
 
   return deps;
 }
+
+// TODO: expose to make testable
 
 function extractDeps(params) {
   var deps = [];
@@ -288,6 +278,51 @@ function extractDeps(params) {
   });
 
   return deps;
+}
+
+function findVariable(varName, scope) {
+
+  var variable;
+  var currentScope = scope;
+
+  while (!variable && currentScope) {
+    variable = _.findWhere(currentScope.variables, { name: varName });
+    currentScope = currentScope.upper;
+  }
+
+  if (!variable) {
+    return undefined;
+  }
+
+  var node = _.first(variable.defs).node;
+
+  return node;
+}
+
+function extractVariableDeps(varName, scope) {
+
+  var varNode = findVariable(varName, scope);
+  if (!varNode) {
+    return [];
+  }
+
+  var params = [];
+
+  if (varNode.type === 'FunctionDeclaration') {
+    params = varNode.params;
+  } else if (varNode.type === 'VariableDeclarator') {
+    params = varNode.init.params;
+  }
+
+  var deps = extractDeps(params);
+
+  return deps;
+}
+
+function findScope(ast) {
+  var scopeManager = escope.analyze(ast);
+  var scope = scopeManager.acquire(ast);
+  return scope;
 }
 
 module.exports = parse;
