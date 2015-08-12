@@ -65,6 +65,17 @@ case 'current':
   return;
 
 default:
+  var types = [
+    'controller', 'directive', 'factory', 'filter', 'provider', 'service'
+  ];
+  if (_.contains(types, args[0])) {
+
+    var outputPath = args[1];
+
+    ask.name();
+
+    return;
+  }
 }
 
 if (args.length < 2) {

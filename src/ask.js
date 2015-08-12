@@ -65,9 +65,44 @@ function deps(unknown, callback) {
 
 }
 
+
+function name(callback) {
+
+  var questions = [
+    {
+      type: 'input',
+      name: 'name',
+      message: 'What is a name of the unit?'
+    },
+    {
+      type: 'input',
+      name: 'module',
+      message: 'What is a name of the module for this unit?'
+    },
+    {
+      type: 'confirm',
+      name: 'hasDeps',
+      message: 'Does unit has dependencies?'
+    },
+    {
+      type: 'input',
+      name: 'depName',
+      message: 'What is a name of the dependency?'
+    }
+  ];
+
+  inquirer.prompt(questions, function (answers) {
+
+    console.log(answers);
+    callback();
+
+  });
+}
+
 var ask = {
   unit: unit,
-  deps: deps
+  deps: deps,
+  name: name
 };
 
 module.exports = ask;
