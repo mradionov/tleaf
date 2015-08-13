@@ -83,18 +83,75 @@ function name(callback) {
       type: 'confirm',
       name: 'hasDeps',
       message: 'Does unit has dependencies?'
-    },
-    {
-      type: 'input',
-      name: 'depName',
-      message: 'What is a name of the dependency?'
     }
   ];
 
   inquirer.prompt(questions, function (answers) {
 
-    console.log(answers);
-    callback();
+    var res = {
+      name: answers.name,
+      module: answers.name,
+      deps: []
+    };
+
+    if (answers.hasDeps) {
+
+      dep(null, function (depys) {
+
+        res.reps = depys;
+
+        callback(res);
+
+      });
+
+    } else {
+      callback(res);
+    }
+
+  });
+}
+
+function dep(depys, callback) {
+
+  depys = depys || [];
+
+  var nameQuestion = {
+    type: 'input',
+    name: 'name',
+    message: 'What is a name of the dependency? ("Enter" to skip)'
+  };
+
+  var typeQuestion = {
+    type: 'list',
+    name: 'type',
+    message: 'What is a type of the dependency?',
+    choices: TYPES
+  };
+
+  inquirer.prompt(nameQuestion, function (nameAnswer) {
+
+    if (!nameAnswer.name) {
+
+      callback(depys);
+
+    } else {
+
+      inquirer.prompt(typeQuestion, function (typeAnswer) {
+
+        console.log(typeAnswer);
+
+        var depy = {
+          name: nameAnswer.name,
+          type: typeAnswer.type
+        };
+
+        depys.push(depy);
+
+        dep(depys, callback);
+
+      });
+
+    }
 
   });
 }
@@ -102,7 +159,8 @@ function name(callback) {
 var ask = {
   unit: unit,
   deps: deps,
-  name: name
+  name: name,
+  dep: dep
 };
 
 module.exports = ask;
