@@ -1,7 +1,20 @@
 'use strict';
 
-var inquirer = require('inquirer');
-var _ = require('lodash');
+var inquirer = require('inquirer'),
+    _ = require('lodash'),
+    Q = require('q');
+
+////////
+
+var ask = {
+  createUnit: createUnit,
+  pickUnit: pickUnit,
+  identifyDeps: identifyDeps
+};
+
+module.exports = ask;
+
+////////
 
 var TYPES = [
   'controller',
@@ -9,7 +22,96 @@ var TYPES = [
   'provider'
 ];
 
-function unit(units, callback) {
+function prompt(questions) {
+    var deffered = Q.defer();
+    inquirer.prompt(questions, function (answers) {
+      deffered.resolve(answers);
+    });
+    return deffered.promise;
+}
+
+function createUnit() {
+
+  var questions = [
+    {
+      type: 'input',
+      name: 'name',
+      message: 'Unit name:'
+    },
+    {
+      type: 'input',
+      name: 'module',
+      message: 'Module name:'
+    },
+    {
+      type: 'confirm',
+      name: 'hasDeps',
+      message: 'Has dependencies?'
+    }
+  ];
+
+  return prompt(questions).then(function (answers) {
+
+    var unit = {
+      name: answers.name,
+      module: { name: answers.module },
+      deps: []
+    };
+
+    if (!answers.hasDeps) {
+      return unit;
+    }
+
+    return addUnitDependency().then(function (deps) {
+      unit.deps = deps;
+      return unit;
+    });
+
+  });
+
+}
+
+function addUnitDependency(deps) {
+
+  deps = deps || [];
+
+  var nameQuestion = {
+    type: 'input',
+    name: 'name',
+    message: 'Dependency name ("Enter" to skip): '
+  };
+
+  var typeQuestion = {
+    type: 'list',
+    name: 'type',
+    message: 'Dependency type:',
+    choices: TYPES
+  };
+
+  return prompt(nameQuestion).then(function (nameAnswer) {
+
+    // exit when nothing entered
+    if (!nameAnswer.name) {
+      // resolve recursive chain with all collected deps
+      return deps;
+    }
+
+    return prompt(typeQuestion).then(function (typeAnswer) {
+      var dep = {
+        name: nameAnswer.name,
+        type: typeAnswer.type
+      };
+      deps.push(dep);
+
+      // recursive, pass deps array along the way until everything resolves
+      return addUnitDependency(deps);
+    });
+
+  });
+
+}
+
+function pickUnit(units) {
 
   var question = {
     type: 'list',
@@ -30,13 +132,13 @@ function unit(units, callback) {
     }
   };
 
-  inquirer.prompt([question], function (answers) {
-    var unit = units[answers.unit];
-    callback(unit);
+  return prompt(question).then(function (answer) {
+    var unit = units[answer.unit];
+    return unit;
   });
 }
 
-function deps(unknown, callback) {
+function identifyDeps(unknown) {
 
   var questions = unknown.map(function (dep, index) {
     return {
@@ -47,120 +149,17 @@ function deps(unknown, callback) {
     };
   });
 
-  inquirer.prompt(questions, function (answers) {
+  return prompt(questions).then(function (answers) {
 
     var identified = _.map(answers, function (type, index) {
-
       var dep = unknown[index];
-
       return {
         name: dep.name,
         type: type
       };
-
     });
 
-    callback(identified);
+    return identified;
   });
 
 }
-
-
-function name(callback) {
-
-  var questions = [
-    {
-      type: 'input',
-      name: 'name',
-      message: 'What is a name of the unit?'
-    },
-    {
-      type: 'input',
-      name: 'module',
-      message: 'What is a name of the module for this unit?'
-    },
-    {
-      type: 'confirm',
-      name: 'hasDeps',
-      message: 'Does unit has dependencies?'
-    }
-  ];
-
-  inquirer.prompt(questions, function (answers) {
-
-    var res = {
-      name: answers.name,
-      module: answers.name,
-      deps: []
-    };
-
-    if (answers.hasDeps) {
-
-      dep(null, function (depys) {
-
-        res.reps = depys;
-
-        callback(res);
-
-      });
-
-    } else {
-      callback(res);
-    }
-
-  });
-}
-
-function dep(depys, callback) {
-
-  depys = depys || [];
-
-  var nameQuestion = {
-    type: 'input',
-    name: 'name',
-    message: 'What is a name of the dependency? ("Enter" to skip)'
-  };
-
-  var typeQuestion = {
-    type: 'list',
-    name: 'type',
-    message: 'What is a type of the dependency?',
-    choices: TYPES
-  };
-
-  inquirer.prompt(nameQuestion, function (nameAnswer) {
-
-    if (!nameAnswer.name) {
-
-      callback(depys);
-
-    } else {
-
-      inquirer.prompt(typeQuestion, function (typeAnswer) {
-
-        console.log(typeAnswer);
-
-        var depy = {
-          name: nameAnswer.name,
-          type: typeAnswer.type
-        };
-
-        depys.push(depy);
-
-        dep(depys, callback);
-
-      });
-
-    }
-
-  });
-}
-
-var ask = {
-  unit: unit,
-  deps: deps,
-  name: name,
-  dep: dep
-};
-
-module.exports = ask;
