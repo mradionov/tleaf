@@ -1,11 +1,11 @@
 'use strict';
 
-var _ = require('lodash');
-
-var config = require('./config/resolved'),
+var config = require('./config'),
     run = require('./run');
 
 ////////
+
+// TODO: catch promise errors, because they are swallowed
 
 var args = process.argv.slice(2);
 var command = args[0];
@@ -26,7 +26,7 @@ case 'current':
 
 default:
 
-  if (_.contains(config.processedTypes, args[0])) {
+  if (config.processedUnits.indexOf(args[0]) > -1) {
     run.create(args[0], args[1]);
     break;
   }
@@ -36,5 +36,12 @@ default:
     break;
   }
 
-  run.help();
+  help();
+}
+
+function help() {
+  console.log('USAGE:');
+  console.log('\tinit /path/to/folder');
+  console.log('\tcurrent');
+  console.log('\t/path/to/source.js /path/to/output.spec.js');
 }

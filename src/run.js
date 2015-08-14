@@ -6,32 +6,21 @@ var fs = require('fs'),
     _ = require('lodash'),
     Q = require('q');
 
-var parseSource = require('./parse'),
+var parse = require('./parse'),
     ask = require('./ask'),
     identify = require('./identify'),
     cache = require('./cache'),
     serialize = require('./serialize'),
-    generate = require('./generate');
-
-var config = require('./config/resolved');
-
-////////
-
-var run = {
-    init: init,
-    use: use,
-    current: current,
-    create: create,
-    parse: parse,
-    help: help
-};
-
-module.exports = run;
+    render = require('./render'),
+    template = require('./template');
 
 ////////
 
+var run = module.exports = {};
 
-function init(initPathArg) {
+////////
+
+run.init = function (initPathArg) {
   var initPath = path.resolve(initPathArg);
   var defaultsPath = './defaults';
   var configFileName = 'config.js';
@@ -40,10 +29,10 @@ function init(initPathArg) {
     var configPath = path.join(initPath, configFileName);
     cache.set('useConfig', configPath);
   });
-}
+};
 
 
-function use(usePathArg) {
+run.use = function (usePathArg) {
   var usePath = path.resolve(usePathArg);
 
   return Q.nfcall(fs.exists, usePath).then(function (exists) {
@@ -54,30 +43,30 @@ function use(usePathArg) {
 
     cache.set('useConfig', usePath);
   });
-}
+};
 
 
-function current() {
+run.current = function () {
   var usePath = cache.get('use');
   if (usePath) {
     console.log('Current config path: %s', usePath);
   } else {
     console.log('Using default config');
   }
-}
+};
 
 
-function create(typeArg, outputPathArg) {
+run.create = function (typeArg, outputPathArg) {
   var outputPath = path.resolve(outputPathArg);
 
-  ask.createUnit().then(function (unit) {
+  return ask.createUnit().then(function (unit) {
     unit.type = typeArg;
-    depsFn(unit, outputPath);
+    return generate(outputPath, unit);
   });
-}
+};
 
 
-function parse(sourcePathArg, outputPathArg) {
+run.parse = function (sourcePathArg, outputPathArg) {
 
   var sourcePath = path.resolve(sourcePathArg),
       outputPath = path.resolve(outputPathArg);
@@ -89,95 +78,50 @@ function parse(sourcePathArg, outputPathArg) {
 
   var source = fs.readFileSync(sourcePath, 'utf8');
 
-  var units = parseSource(source);
+  var units = parse(source);
 
   if (!units.length) {
     console.error('Could not find any units');
     return false;
   }
 
+  var generateToPath = _.partial(generate, outputPath);
+
   if (units.length === 1) {
-    unitFn(_.first(units), outputPath);
-  } else {
-    ask.pickUnit(units).then(function (unit) {
-      unitFn(unit, outputPath);
-    });
+    return identifyDeps(_.first(units)).then(generateToPath);
   }
 
-}
-
-
-function help() {
-  console.log('USAGE:');
-  console.log('\tinit /path/to/folder');
-  console.log('\tcurrent');
-  console.log('\t/path/to/source.js /path/to/output.spec.js');
-}
+  return ask.pickUnit(units).then(identifyDeps).then(generateToPath);
+};
 
 
 ////////
 
 
-function unitFn(unit, outputPath) {
+function identifyDeps(unit) {
+  var deferred = Q.defer();
 
   var deps = identify(unit.deps);
 
   if (!deps.unknown.length) {
-
     unit.deps = deps.known;
-
-    depsFn(unit, outputPath);
-
-  } else {
-
-    ask.identifyDeps(deps.unknown).then(function (identified) {
-
-      cache.set('deps', identified);
-
-      unit.deps = deps.known.concat(identified);
-
-      depsFn(unit, outputPath);
-
-    });
-
+    deferred.resolve(unit);
+    return deferred.promise;
   }
 
+  return ask.identifyDeps(deps.unknown).then(function (identified) {
+    unit.deps = deps.known.concat(identified);
+    return unit;
+  });
 }
 
-function depsFn(unit, outputPath) {
+function generate(outputPath, unit) {
 
-  var unitFileName = unit.type + '.tpl.js';
-
-  var defaultTemplateDir = './src/defaults/templates/';
-
-  var templatePath = path.join(defaultTemplateDir, unitFileName);
-
-  var usePath = cache.get('useConfig');
-  if (usePath) {
-
-    var useDir = path.dirname(usePath);
-    var useTemplateDir = path.join(useDir, 'templates');
-    var useTemplatePath = path.join(useTemplateDir, unitFileName);
-
-    if (fs.existsSync(useTemplatePath)) {
-      templatePath = useTemplatePath;
-    } else {
-      console.error('Custom template is missing for type "%s"', unit.type);
-      console.error('Falling back default template');
-    }
-
-  }
-
-  var template = fs.readFileSync(templatePath, 'utf-8');
+  var source = template.unit(unit.type);
 
   var data = serialize(unit);
 
-  var options = {
-    indent: config.indent
-  };
-
-  var output = generate(template, data, options);
+  var output = render(source, data);
 
   fs.writeFileSync(outputPath, output);
-
 }

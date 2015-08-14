@@ -4,33 +4,16 @@ var inquirer = require('inquirer'),
     _ = require('lodash'),
     Q = require('q');
 
-////////
-
-var ask = {
-  createUnit: createUnit,
-  pickUnit: pickUnit,
-  identifyDeps: identifyDeps
-};
-
-module.exports = ask;
+var config = require('./config');
 
 ////////
 
-var TYPES = [
-  'controller',
-  'service',
-  'provider'
-];
+var ask = module.exports = {};
 
-function prompt(questions) {
-    var deffered = Q.defer();
-    inquirer.prompt(questions, function (answers) {
-      deffered.resolve(answers);
-    });
-    return deffered.promise;
-}
+////////
 
-function createUnit() {
+
+ask.createUnit = function() {
 
   var questions = [
     {
@@ -69,49 +52,10 @@ function createUnit() {
 
   });
 
-}
+};
 
-function addUnitDependency(deps) {
 
-  deps = deps || [];
-
-  var nameQuestion = {
-    type: 'input',
-    name: 'name',
-    message: 'Dependency name ("Enter" to skip): '
-  };
-
-  var typeQuestion = {
-    type: 'list',
-    name: 'type',
-    message: 'Dependency type:',
-    choices: TYPES
-  };
-
-  return prompt(nameQuestion).then(function (nameAnswer) {
-
-    // exit when nothing entered
-    if (!nameAnswer.name) {
-      // resolve recursive chain with all collected deps
-      return deps;
-    }
-
-    return prompt(typeQuestion).then(function (typeAnswer) {
-      var dep = {
-        name: nameAnswer.name,
-        type: typeAnswer.type
-      };
-      deps.push(dep);
-
-      // recursive, pass deps array along the way until everything resolves
-      return addUnitDependency(deps);
-    });
-
-  });
-
-}
-
-function pickUnit(units) {
+ask.pickUnit = function (units) {
 
   var question = {
     type: 'list',
@@ -136,16 +80,17 @@ function pickUnit(units) {
     var unit = units[answer.unit];
     return unit;
   });
-}
+};
 
-function identifyDeps(unknown) {
+
+ask.identifyDeps = function (unknown) {
 
   var questions = unknown.map(function (dep, index) {
     return {
       type: 'list',
       name: index.toString(),
       message: 'What is a type of "' + dep.name + '"?',
-      choices: TYPES
+      choices: config.processedUnits
     };
   });
 
@@ -160,6 +105,59 @@ function identifyDeps(unknown) {
     });
 
     return identified;
+  });
+
+};
+
+
+////////
+
+
+function prompt(questions) {
+    var deffered = Q.defer();
+    inquirer.prompt(questions, function (answers) {
+      deffered.resolve(answers);
+    });
+    return deffered.promise;
+}
+
+
+function addUnitDependency(deps) {
+
+  deps = deps || [];
+
+  var nameQuestion = {
+    type: 'input',
+    name: 'name',
+    message: 'Dependency name ("Enter" to skip): '
+  };
+
+  var typeQuestion = {
+    type: 'list',
+    name: 'type',
+    message: 'Dependency type:',
+    choices: config.processedUnits
+  };
+
+  return prompt(nameQuestion).then(function (nameAnswer) {
+
+    // exit when nothing entered
+    if (!nameAnswer.name) {
+      // resolve recursive chain with all collected deps
+      return deps;
+    }
+
+    return prompt(typeQuestion).then(function (typeAnswer) {
+      var dep = {
+        name: nameAnswer.name,
+        type: typeAnswer.type
+      };
+      deps.push(dep);
+
+      // recursive, pass deps array along the way until everything resolves
+      return addUnitDependency(deps);
+    });
+
   });
 
 }

@@ -5,7 +5,11 @@ module.exports = {
   indent: '\t',
 
   // List the unit types which should be processed
-  processedTypes: [
+  processedUnits: [
     'controller', 'directive', 'factory', 'service', 'filter', 'provider'
+  ],
+
+  processedProviders: [
+    'constant', 'factory', 'service', 'value', 'provider'
   ]
 };
