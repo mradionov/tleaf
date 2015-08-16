@@ -3,29 +3,24 @@
 var Handlebars = require('handlebars'),
     _ = require('lodash');
 
-var config = require('../config'),
-    template = require('../template');
-
 var helpers = require('./helpers');
 
 ////////
 
 module.exports = render;
 
-registerHelpers();
-registerPartials();
-
 ////////
 
-// TODO: order by type
-// TODO: generate helper properties
+// TODO: custom helpers in config
 // TODO: support coffee templates
-function render(source, data) {
-
-  var configOptions = _.pick(config, 'indent');
-  var options = _.defaults(configOptions, {
-    indent: '\t'
+function render(source, data, options) {
+  options = _.defaults(options || {}, {
+    indent: '\t',
+    partials: []
   });
+
+  registerPartials(options.partials);
+  registerHelpers();
 
   var compiledTemplate = Handlebars.compile(source, {
     noEscape: true
@@ -55,9 +50,8 @@ function registerHelpers() {
 }
 
 
-function registerPartials() {
-  _.forEach(config.processedProviders, function (provider) {
-    var source = template.provider(provider);
-    Handlebars.registerPartial(provider, source);
+function registerPartials(partials) {
+  _.forEach(partials, function (source, name) {
+    Handlebars.registerPartial(name, source);
   });
 }

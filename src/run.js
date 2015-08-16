@@ -1,14 +1,14 @@
 'use strict';
 
-var fs = require('fs'),
+var fs = require('fs-extra'),
     path = require('path'),
-    ncp = require('ncp'),
     _ = require('lodash'),
     Q = require('q');
 
-var parse = require('./parse'),
+var config = require('./config'),
+    parse = require('./parse'),
     ask = require('./ask'),
-    identify = require('./identify'),
+    filter = require('./filter'),
     cache = require('./cache'),
     serialize = require('./serialize'),
     render = require('./render'),
@@ -22,12 +22,12 @@ var run = module.exports = {};
 
 run.init = function (initPathArg) {
   var initPath = path.resolve(initPathArg);
-  var defaultsPath = './defaults';
   var configFileName = 'config.js';
+  var configPath = path.join(initPath, configFileName);
+  var defaultsPath = './src/defaults';
 
-  return Q.nfcall(ncp, defaultsPath, initPath).then(function () {
-    var configPath = path.join(initPath, configFileName);
-    cache.set('useConfig', configPath);
+  return Q.nfcall(fs.copy, defaultsPath, initPath).then(function () {
+    return cache.set('useConfig', configPath);
   });
 };
 
@@ -37,32 +37,30 @@ run.use = function (usePathArg) {
 
   return Q.nfcall(fs.exists, usePath).then(function (exists) {
     if (!exists) {
-      console.error('Config file not found');
-      return false;
+      console.log('[tleaf]: Config file not found'); // TODO: throw?
+      return;
     }
-
-    cache.set('useConfig', usePath);
+    return cache.set('useConfig', usePath);
   });
 };
 
 
 run.current = function () {
-  var usePath = cache.get('use');
-  if (usePath) {
-    console.log('Current config path: %s', usePath);
-  } else {
-    console.log('Using default config');
-  }
+  return cache.get('useConfig').then(function (usePath) {
+    if (!usePath) {
+      console.log('[tleaf]: Using default config'); // TODO: log?
+    } else {
+      console.log('[tleaf]: Current config path: %s', usePath);
+    }
+  });
 };
 
 
-run.create = function (typeArg, outputPathArg) {
+run.create = function (outputPathArg) {
   var outputPath = path.resolve(outputPathArg);
+  var generateToPath = _.partial(generate, outputPath);
 
-  return ask.createUnit().then(function (unit) {
-    unit.type = typeArg;
-    return generate(outputPath, unit);
-  });
+  return ask.createUnit().then(generateToPath);
 };
 
 
@@ -88,20 +86,22 @@ run.parse = function (sourcePathArg, outputPathArg) {
   var generateToPath = _.partial(generate, outputPath);
 
   if (units.length === 1) {
-    return identifyDeps(_.first(units)).then(generateToPath);
+    return identify(_.first(units)).then(generateToPath);
   }
 
-  return ask.pickUnit(units).then(identifyDeps).then(generateToPath);
+  return ask.pickUnit(units).then(identify).then(generateToPath);
 };
 
 
 ////////
 
 
-function identifyDeps(unit) {
+function identify(unit) {
   var deferred = Q.defer();
 
-  var deps = identify(unit.deps);
+  var deps = filter(unit.deps, {
+    exclude: config.filteredDependencies
+  });
 
   if (!deps.unknown.length) {
     unit.deps = deps.known;
@@ -115,13 +115,39 @@ function identifyDeps(unit) {
   });
 }
 
+function sort(deps) {
+  var copy = deps.slice();
+
+  var order = config.processedProviders;
+
+  copy.sort(function (depA, depB) {
+    var indexA = order.indexOf(depA.type),
+        indexB = order.indexOf(depB.type);
+    if (indexA > indexB) { return 1; }
+    if (indexA < indexB) { return -1; }
+    return 0;
+  });
+
+  return copy;
+}
+
 function generate(outputPath, unit) {
+
+  unit.deps = sort(unit.deps);
 
   var source = template.unit(unit.type);
 
   var data = serialize(unit);
 
-  var output = render(source, data);
+  var partials = {};
+  _.forEach(config.processedProviders, function (provider) {
+    partials[provider] = template.provider(provider);
+  });
+
+  var output = render(source, data, {
+    indent: config.indent,
+    partials: partials
+  });
 
   fs.writeFileSync(outputPath, output);
 }

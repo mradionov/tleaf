@@ -17,6 +17,12 @@ ask.createUnit = function() {
 
   var questions = [
     {
+      type: 'list',
+      name: 'type',
+      message: 'Unit type:',
+      choices: config.processedUnits
+    },
+    {
       type: 'input',
       name: 'name',
       message: 'Unit name:'
@@ -37,6 +43,7 @@ ask.createUnit = function() {
 
     var unit = {
       name: answers.name,
+      type: answers.type,
       module: { name: answers.module },
       deps: []
     };

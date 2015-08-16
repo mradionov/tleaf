@@ -11,5 +11,9 @@ module.exports = {
 
   processedProviders: [
     'constant', 'factory', 'service', 'value', 'provider'
+  ],
+
+  filteredDependencies: [
+    '$scope'
   ]
 };

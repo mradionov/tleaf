@@ -14,10 +14,10 @@
     "escope": "^3.2.0",
     "esprima": "^2.4.0",
     "estraverse": "^4.1.0",
+    "fs-extra": "^0.23.1",
     "handlebars": "^3.0.3",
     "inquirer": "^0.9.0",
     "lodash": "^3.10.0",
-    "ncp": "^2.0.0",
     "q": "^1.4.1"
   },
   "devDependencies": {
@@ -26,7 +26,7 @@
     "node-inspector": "^0.11.1"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha test/specs",
-    "test:debug": "./node_modules/node-inspector/bin/node-debug.js _mocha test/specs"
+    "test": "./node_modules/mocha/bin/mocha 'test/specs/**/*.spec.js'",
+    "test:debug": "./node_modules/node-inspector/bin/node-debug.js _mocha 'test/specs/**/*.spec.js'"
   }
 }

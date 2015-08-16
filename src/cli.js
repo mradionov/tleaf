@@ -37,19 +37,18 @@ default:
     break;
   }
 
+  help();
+
 }
 
-if (p) {
+if (p && _.isFunction(p.then)) {
 
   p.catch(function (err) {
     console.error(err);
     console.error(err.stack);
   });
 
-} else {
-  help();
 }
-
 
 ////////
 
@@ -97,7 +96,8 @@ function help(one) {
 
   if (!one) {
     output += '\n';
-    output += 'tleaf - AngularJS unit test generator'
+    output += 'tleaf - AngularJS unit test generator';
+    output += '\n';
   }
 
   output += '\n';

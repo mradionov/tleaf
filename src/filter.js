@@ -4,22 +4,23 @@ var _ = require('lodash');
 
 ////////
 
-module.exports = identify;
+module.exports = filter;
 
 ////////
 
 // TODO: cache identified deps for respective project
-function identify(all) {
+function filter(all, options) {
+  options = _.defaults(options || {}, {
+    exclude: []
+  });
 
   var deps = {
     known: [],
     unknown: []
   };
 
-  var exclude = ['$scope', '$http'];
-
   var filtered = _.filter(all, function (dep) {
-    return !_.contains(exclude, dep.name);
+    return !_.contains(options.exclude, dep.name);
   });
 
   deps.unknown = filtered;
