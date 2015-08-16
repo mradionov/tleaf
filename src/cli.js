@@ -1,47 +1,119 @@
 'use strict';
 
-var config = require('./config'),
-    run = require('./run');
+var _ = require('lodash');
+var run = require('./run');
 
 ////////
 
-// TODO: catch promise errors, because they are swallowed
-
 var args = process.argv.slice(2);
 var command = args[0];
+var p;
 
 switch (command) {
 
+case 'create':
+  validate(args[1], 'Missing path to output file', 'create');
+  p = run.create(args[1]);
+  break;
+
 case 'init':
-  run.init(args[1]);
+  validate(args[1], 'Missing path to output folder', 'init');
+  p = run.init(args[1]);
   break;
 
 case 'use':
-  run.use(args[1]);
+  validate(args[1], 'Missing path to config file', 'use');
+  p = run.use(args[1]);
   break;
 
 case 'current':
-  run.current();
+  p = run.current();
   break;
 
 default:
 
-  if (config.processedUnits.indexOf(args[0]) > -1) {
-    run.create(args[0], args[1]);
-    break;
-  }
-
   if (args.length === 2) {
-    run.parse(args[0], args[1]);
+    p = run.parse(args[0], args[1]);
     break;
   }
 
+}
+
+if (p) {
+
+  p.catch(function (err) {
+    console.error(err);
+    console.error(err.stack);
+  });
+
+} else {
   help();
 }
 
-function help() {
-  console.log('USAGE:');
-  console.log('\tinit /path/to/folder');
-  console.log('\tcurrent');
-  console.log('\t/path/to/source.js /path/to/output.spec.js');
+
+////////
+
+function validate(expression, message, command) {
+  if (expression) { return; }
+  console.log('[tleaf]: %s', message);
+  if (command) {
+    help(command);
+  }
+  process.exit(0);
+}
+
+function help(one) {
+
+  var commands = [
+    {
+      name: 'parse',
+      usage: '[/path/to/source.js] [/path/to/output.spec.js]',
+      description: 'Create a test by parsing existing AngularJS source file.'
+    },
+    {
+      name: 'create',
+      usage: 'create [/path/to/output.spec.js]',
+      description: 'Create a test by manually entering details.'
+    },
+    {
+      name: 'init',
+      usage: 'init [/path/to/folder]',
+      description: 'Copy default config and templates to a folder.'
+    },
+    {
+      name: 'use',
+      usage: 'use [/path/to/config.js]',
+      description: 'Use destination config and templates.'
+    },
+    {
+      name: 'current',
+      usage: 'current',
+      description: 'Show path of currently used config.'
+    },
+
+  ];
+
+  var output = '';
+
+  if (!one) {
+    output += '\n';
+    output += 'tleaf - AngularJS unit test generator'
+  }
+
+  output += '\n';
+  output += 'Usage:';
+  output += '\n';
+
+  _.each(commands, function (command) {
+    if (!one || one === command.name) {
+      var message = '';
+      message += '\n';
+      message += '  tleaf ' + command.usage + '\n';
+      message += '    ' + command.description + '\n';
+
+      output += message;
+    }
+  });
+
+  console.log(output);
 }
