@@ -4,8 +4,6 @@ var fs = require('fs-extra');
 var _ = require('lodash'),
     Q = require('q');
 
-var cachePath = __dirname + '/../test/cache.json';
-
 ////////
 
 var cache = module.exports = {};
@@ -29,6 +27,10 @@ cache.get = function (path, defaultValue) {
   });
 };
 
+cache.location = function () {
+  return __dirname + '/../test/cache.json';
+};
+
 ////////
 
 function load() {
@@ -37,11 +39,11 @@ function load() {
     return deferred.resolve(data).promise;
   }
 
-  return Q.nfcall(fs.exists, cachePath).then(function (exists) {
+  return Q.nfcall(fs.exists, cache.location()).then(function (exists) {
     if (!exists) {
       return {};
     }
-    return Q.nfcall(fs.readFile, cachePath, 'utf8').then(function (serialized) {
+    return Q.nfcall(fs.readFile, cache.location(), 'utf8').then(function (serialized) {
       var obj = {};
       try {
         obj = JSON.parse(serialized);
@@ -56,5 +58,5 @@ function save(obj) {
   try {
     serialized = JSON.stringify(obj);
   } catch (e) {}
-  return Q.nfcall(fs.appendFile, cachePath, serialized, { flag: 'w' });
+  return Q.nfcall(fs.appendFile, cache.location(), serialized, { flag: 'w' });
 }
