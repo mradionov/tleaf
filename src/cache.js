@@ -58,5 +58,5 @@ function save(obj) {
   try {
     serialized = JSON.stringify(obj);
   } catch (e) {}
-  return Q.nfcall(fs.appendFile, cache.location(), serialized, { flag: 'w' });
+  return Q.nfcall(fs.writeFile, cache.location(), serialized, 'utf8');
 }
