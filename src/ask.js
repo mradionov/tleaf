@@ -25,12 +25,24 @@ ask.createUnit = function() {
     {
       type: 'input',
       name: 'name',
-      message: 'Unit name:'
+      message: 'Unit name:',
+      validate: function (input) {
+        if (_.isEmpty(_.trim(input))) {
+          return 'Value is required';
+        }
+        return true;
+      }
     },
     {
       type: 'input',
       name: 'module',
-      message: 'Module name:'
+      message: 'Module name:',
+      validate: function (input) {
+        if (_.isEmpty(_.trim(input))) {
+          return 'Value is required';
+        }
+        return true;
+      }
     },
     {
       type: 'confirm',
