@@ -3,80 +3,83 @@
 var assert = require('chai').assert;
 var proxyquire = require('proxyquire');
 
-var fsStub = {};
-
-var cache = proxyquire('./../../src/cache', {
-  'fs-extra': fsStub
-});
+// initialize module before each spec
+proxyquire.noPreserveCache();
 
 describe('cache', function () {
+
+  var cache, fsStub;
+
+  beforeEach(function () {
+    fsStub = {};
+    cache = proxyquire('./../../src/cache', {
+      'fs-extra': fsStub
+    });
+  });
 
   describe('get', function () {
 
     it('should return undefined when cache file missing', function () {
-      fsStub.exists = function (path, cb) { cb(null, false); };
-      cache.get('foo').then(function (value) {
-        assert.isUndefined(value);
-      });
+      fsStub.readFileSync = function () {
+        var error = new Error(); error.code = 'ENOENT'; throw error;
+      };
+      var value = cache.get('foo');
+      assert.isUndefined(value);
     });
 
     it('should return undefined when no key in file', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); };
-      fsStub.readFile = function (path, opt, cb) { cb(null, '{}'); };
-      cache.get('foo').then(function (value) {
-        assert.isUndefined(value);
-      });
+      fsStub.readFileSync = function () { return '{}'; };
+      var value = cache.get('foo');
+      assert.isUndefined(value);
     });
 
     it('should return undefined when cache file is broken', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); };
-      fsStub.readFile = function (path, opt, cb) { cb(null, 'badjson'); };
-      cache.get('foo').then(function (value) {
-        assert.isUndefined(value);
-      });
+      fsStub.readFileSync = function () { return 'badjson'; };
+      var value = cache.get('foo');
+      assert.isUndefined(value);
     });
 
     it('should return default value if provided', function () {
-      fsStub.exists = function (path, cb) { cb(null, false); };
-      cache.get('foo', 'bar').then(function (value) {
-        assert.equal(value, 'bar');
-      });
+      fsStub.readFileSync = function () { return 'badjson'; };
+      var value = cache.get('foo', 'bar');
+      assert.equal(value, 'bar');
     });
 
     it('should return value from cache', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); };
-      fsStub.readFile = function (path, opt, cb) { cb(null, '{"foo":10}'); };
-      cache.get('foo').then(function (value) {
-        assert.equal(value, 10);
-      });
+      fsStub.readFileSync = function () { return '{"foo":10}'; };
+      var value = cache.get('foo');
+      assert.equal(value, 10);
     });
 
     it('should return falsy value from cache', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); };
-      fsStub.readFile = function (path, opt, cb) { cb(null, '{"foo":0}'); };
-      cache.get('foo').then(function (value) {
-        assert.equal(value, 0);
-      });
+      fsStub.readFileSync = function () { return '{"foo":0}'; };
+      var value = cache.get('foo');
+      assert.equal(value, 0);
     });
 
     it('should return default for undefined value', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); };
-      fsStub.readFile = function (path, opt, cb) { cb(null, '{"foo":undefined}'); };
-      cache.get('foo', 'bar').then(function (value) {
-        assert.equal(value, 'bar');
-      });
+      fsStub.readFileSync = function () { return '{"foo":undefined}'; };
+      var value = cache.get('foo', 'bar');
+      assert.equal(value, 'bar');
     });
 
     it('should store in memory call to a file', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); };
-      fsStub.readFile = function (path, opt, cb) { cb(null, '{"foo":10}'); };
-      cache.get('foo').then(function (value) {
-        assert.equal(value, 10);
-      });
-      fsStub.exists = function (path, cb) { cb(null, false); };
-      cache.get('foo').then(function (value) {
-        assert.equal(value, 10);
-      });
+      fsStub.readFileSync = function () { return '{"foo":10}'; };
+      var value = cache.get('foo');
+      assert.equal(value, 10);
+      fsStub.readFileSync = function () { return 'badjson'; };
+      value = cache.get('foo');
+      assert.equal(value, 10);
+    });
+
+    it('should rethrow any error other that missing file', function () {
+      fsStub.readFileSync = function () {
+        var error = new Error(); error.code = 'SOMERR'; throw error;
+      };
+      var fn = function () {
+        cache.get('foo');
+      };
+      assert.throw(fn);
     });
 
   });
@@ -84,46 +87,39 @@ describe('cache', function () {
   describe('set', function () {
 
     it('should write value to new file', function () {
-      fsStub.exists = function (path, cb) { cb(null, false); };
-      fsStub.writeFile = function (path, data, opt, cb) {
+      fsStub.writeFileSync = function (path, data) {
         assert.equal(data, '{"foo":10}');
       };
       cache.set('foo', 10);
     });
 
     it('should write value to existing file', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); }
-      fsStub.readFile = function (path, opt, cb) { cb(null, '{"bar":15}'); };
-      fsStub.writeFile = function (path, data, opt, cb) {
+      fsStub.readFileSync = function () { return '{"bar":15}'; };
+      fsStub.writeFileSync = function (path, data) {
         assert.equal(data, '{"bar":15,"foo":10}');
       };
       cache.set('foo', 10);
     });
 
     it('should write value to new file with bad existing file', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); }
-      fsStub.readFile = function (path, opt, cb) { cb(null, 'badjson'); };
-      fsStub.writeFile = function (path, data, opt, cb) {
+      fsStub.readFileSync = function () { return 'badjson'; };
+      fsStub.writeFileSync = function (path, data) {
         assert.equal(data, '{"foo":10}');
       };
       cache.set('foo', 10);
     });
 
     it('should override value in existing file', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); }
-      fsStub.readFile = function (path, opt, cb) { cb(null, '{"foo":15}'); };
-      fsStub.writeFile = function (path, data, opt, cb) {
+      fsStub.readFileSync = function () { return '{"foo":15}'; };
+      fsStub.writeFileSync = function (path, data) {
         assert.equal(data, '{"foo":10}');
       };
       cache.set('foo', 10);
     });
 
     it('should override deep value in existing file', function () {
-      fsStub.exists = function (path, cb) { cb(null, true); }
-      fsStub.readFile = function (path, opt, cb) {
-        cb(null, '{"foo":{"bar":{"baz":15}}}');
-      };
-      fsStub.writeFile = function (path, data, opt, cb) {
+      fsStub.readFileSync = function () { return '{"foo":{"bar":{"baz":15}}}'; };
+      fsStub.writeFileSync = function (path, data) {
         assert.equal(data, '{"foo":{"bar":{"baz":10}}}');
       };
       cache.set('foo.bar.baz', 10);
@@ -131,5 +127,24 @@ describe('cache', function () {
 
   });
 
+  describe('remove', function () {
+
+    it('should remove top property', function () {
+      fsStub.readFileSync = function () { return '{"foo":10}'; };
+      fsStub.writeFileSync = function (path, data) {
+        assert.equal(data, '{}');
+      };
+      cache.remove('foo');
+    });
+
+    it('should remove deep property', function () {
+      fsStub.readFileSync = function () { return '{"foo":{"bar":{"baz":15}}}'; };
+      fsStub.writeFileSync = function (path, data) {
+        assert.equal(data, '{"foo":{"bar":{}}}');
+      };
+      cache.remove('foo.bar.baz');
+    });
+
+  });
 
 });

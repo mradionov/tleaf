@@ -26,6 +26,10 @@ case 'use':
   p = run.use(args[1]);
   break;
 
+case 'default':
+  p = run.default();
+  break;
+
 case 'current':
   p = run.current();
   break;
@@ -44,7 +48,8 @@ default:
 if (p && _.isFunction(p.then)) {
 
   p.catch(function (err) {
-    console.error(err);
+    console.log('Caught error:');
+    console.error(err.message);
     console.error(err.stack);
   });
 
@@ -83,6 +88,11 @@ function help(one) {
       name: 'use',
       usage: 'use [/path/to/config.js]',
       description: 'Use destination config and templates.'
+    },
+    {
+      name: 'default',
+      usage: 'default',
+      description: 'Use default config and templates.'
     },
     {
       name: 'current',

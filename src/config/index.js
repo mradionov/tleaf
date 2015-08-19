@@ -10,7 +10,7 @@ var defaultConfig = require('./default');
 ////////
 
 var useConfig = {};
-var useConfigPath = cache.get('use');
+var useConfigPath = cache.get('useConfig');
 if (useConfigPath && fs.existsSync(useConfigPath)) {
     useConfig = require(useConfigPath);
 }

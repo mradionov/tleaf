@@ -1,62 +1,106 @@
 'use strict';
 
-var fs = require('fs-extra');
-var _ = require('lodash'),
-    Q = require('q');
+var fs = require('fs-extra'),
+    path = require('path');
+
+var _ = require('lodash');
 
 ////////
 
 var cache = module.exports = {};
 
 // store cache in memory for current run
-var data;
+var tmp;
 
 ////////
 
+// TODO: namespace keys depending on node installation?
+
 cache.set = function (path, value) {
-  return load().then(function (data) {
-    _.set(data, path, value);
-    return save(data);
-  });
+  var data = load();
+  _.set(data, path, value);
+  save(data);
 };
 
 cache.get = function (path, defaultValue) {
-  return load().then(function (data) {
-    var value = _.get(data, path);
-    return _.isUndefined(value) ? defaultValue : value;
-  });
+  var data = load();
+  var value = _.get(data, path);
+  return _.isUndefined(value) ? defaultValue : value;
 };
 
-cache.location = function () {
-  return __dirname + '/../test/cache.json';
+cache.remove = function (path) {
+  var data = load();
+
+  var parts = path.split('.');
+  if (parts.length > 1) {
+
+    var key = parts.pop();
+    var parentPath = parts.join('.');
+    var parent = _.get(data, parentPath);
+
+    delete parent[key];
+
+  } else {
+
+    delete data[path];
+
+  }
+
+  save(data);
+};
+
+// TODO: check on windows
+cache.path = function () {
+  var homePath = process.env.HOME;
+  if (process.platform === 'win32') {
+    homePath = process.env.USERPROFILE;
+  }
+
+  var cacheDirName = '.tleaf';
+  var cacheFileName = 'cache.json';
+  var cachePath = path.join(homePath, cacheDirName, cacheFileName);
+
+  return cachePath;
 };
 
 ////////
 
 function load() {
-  var deferred = Q.defer();
-  if (data) {
-    return deferred.resolve(data).promise;
+  if (tmp) {
+    return tmp;
   }
 
-  return Q.nfcall(fs.exists, cache.location()).then(function (exists) {
-    if (!exists) {
-      return {};
-    }
-    return Q.nfcall(fs.readFile, cache.location(), 'utf8').then(function (serialized) {
-      var obj = {};
-      try {
-        obj = JSON.parse(serialized);
-      } catch (e) {}
-      return obj;
-    });
-  });
-}
-
-function save(obj) {
   var serialized = '';
   try {
-    serialized = JSON.stringify(obj);
-  } catch (e) {}
-  return Q.nfcall(fs.writeFile, cache.location(), serialized, 'utf8');
+    serialized = fs.readFileSync(cache.path(), 'utf8');
+  } catch(err) {
+    // it's fine if cache file does not exist, it will be created on save
+    if (err.code !== 'ENOENT') {
+      throw new Error(err);
+    }
+  }
+
+  var data = {};
+  try {
+    data = JSON.parse(serialized);
+  } catch (err) {}
+
+  tmp = data;
+
+  return data;
+}
+
+function save(data) {
+  var serialized = '';
+  try {
+    serialized = JSON.stringify(data);
+  } catch (err) {}
+
+  tmp = data;
+
+  var cachePath = cache.path();
+  var cacheDir = path.dirname(cachePath);
+
+  fs.mkdirsSync(cacheDir);
+  fs.writeFileSync(cachePath, serialized, 'utf8');
 }

@@ -24,35 +24,41 @@ run.init = function (initPathArg) {
   var initPath = path.resolve(initPathArg);
   var configFileName = 'config.js';
   var configPath = path.join(initPath, configFileName);
-  var defaultsPath = './src/defaults';
+  var defaultsPath = path.join(__dirname, 'src', 'defaults');
 
-  return Q.nfcall(fs.copy, defaultsPath, initPath).then(function () {
-    return cache.set('useConfig', configPath);
-  });
+  fs.copySync(defaultsPath, initPath);
+  cache.set('useConfig', configPath);
+  run.current();
 };
 
 
 run.use = function (usePathArg) {
   var usePath = path.resolve(usePathArg);
 
-  return Q.nfcall(fs.exists, usePath).then(function (exists) {
-    if (!exists) {
-      console.log('[tleaf]: Config file not found'); // TODO: throw?
-      return;
-    }
-    return cache.set('useConfig', usePath);
-  });
+  var exists = fs.existsSync(usePath);
+  if (!exists) {
+    console.log('[tleaf]: Config file not found'); // TODO: throw?
+    return false;
+  }
+
+  cache.set('useConfig', usePath);
+  run.current();
+};
+
+
+run.default = function () {
+  cache.remove('useConfig');
+  run.current();
 };
 
 
 run.current = function () {
-  return cache.get('useConfig').then(function (usePath) {
-    if (!usePath) {
-      console.log('[tleaf]: Using default config'); // TODO: log?
-    } else {
-      console.log('[tleaf]: Current config path: %s', usePath);
-    }
-  });
+  var usePath = cache.get('useConfig');
+  if (!usePath) {
+    console.log('[tleaf]: Using default config'); // TODO: custom logger?
+  } else {
+    console.log('[tleaf]: Current config path: %s', usePath);
+  }
 };
 
 
