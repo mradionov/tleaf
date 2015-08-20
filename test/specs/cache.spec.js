@@ -3,7 +3,7 @@
 var assert = require('chai').assert;
 var proxyquire = require('proxyquire');
 
-// initialize module before each spec
+// initialize module before each spec because cache has in-memory storage
 proxyquire.noPreserveCache();
 
 describe('cache', function () {

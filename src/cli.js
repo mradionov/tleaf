@@ -7,37 +7,36 @@ var run = require('./run');
 
 var args = process.argv.slice(2);
 var command = args[0];
-var p;
 
 switch (command) {
 
 case 'create':
   validate(args[1], 'Missing path to output file', 'create');
-  p = run.create(args[1]);
+  run.create(args[1]);
   break;
 
 case 'init':
   validate(args[1], 'Missing path to output folder', 'init');
-  p = run.init(args[1]);
+  run.init(args[1]);
   break;
 
 case 'use':
   validate(args[1], 'Missing path to config file', 'use');
-  p = run.use(args[1]);
+  run.use(args[1]);
   break;
 
 case 'default':
-  p = run.default();
+  run.default();
   break;
 
 case 'current':
-  p = run.current();
+  run.current();
   break;
 
 default:
 
   if (args.length === 2) {
-    p = run.parse(args[0], args[1]);
+    run.parse(args[0], args[1]);
     break;
   }
 
@@ -45,15 +44,6 @@ default:
 
 }
 
-if (p && _.isFunction(p.then)) {
-
-  p.catch(function (err) {
-    console.log('Caught error:');
-    console.error(err.message);
-    console.error(err.stack);
-  });
-
-}
 
 ////////
 

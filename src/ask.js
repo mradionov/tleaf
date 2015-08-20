@@ -1,10 +1,7 @@
 'use strict';
 
 var inquirer = require('inquirer'),
-    _ = require('lodash'),
-    Q = require('q');
-
-var config = require('./config');
+    _ = require('lodash');
 
 ////////
 
@@ -13,45 +10,27 @@ var ask = module.exports = {};
 ////////
 
 
-ask.createUnit = function() {
+ask.createUnit = function(options, callback) {
+  options = _.defaults(options || {}, {
+    units: [],
+    providers: []
+  });
+  callback = callback || _.noop;
+
+  if (!options.units.length) {
+    return callback(new Error('No units to process'));
+  }
+  if (!options.providers.length) {
+    return callback(new Error('No providers to process'));
+  }
 
   var questions = [
-    {
-      type: 'list',
-      name: 'type',
-      message: 'Unit type:',
-      choices: config.processedUnits
-    },
-    {
-      type: 'input',
-      name: 'name',
-      message: 'Unit name:',
-      validate: function (input) {
-        if (_.isEmpty(_.trim(input))) {
-          return 'Value is required';
-        }
-        return true;
-      }
-    },
-    {
-      type: 'input',
-      name: 'module',
-      message: 'Module name:',
-      validate: function (input) {
-        if (_.isEmpty(_.trim(input))) {
-          return 'Value is required';
-        }
-        return true;
-      }
-    },
-    {
-      type: 'confirm',
-      name: 'hasDeps',
-      message: 'Has dependencies?'
-    }
+    { type: 'list', name: 'type', message: 'Unit type:', choices: options.units },
+    { type: 'input', name: 'name', message: 'Unit name:', validate: required },
+    { type: 'input', name: 'module', message: 'Module name:', validate: required }
   ];
 
-  return prompt(questions).then(function (answers) {
+  inquirer.prompt(questions, function (answers) {
 
     var unit = {
       name: answers.name,
@@ -60,20 +39,16 @@ ask.createUnit = function() {
       deps: []
     };
 
-    if (!answers.hasDeps) {
-      return unit;
-    }
-
-    return addUnitDependency().then(function (deps) {
-      unit.deps = deps;
-      return unit;
+    // unit.deps will be populated by reference
+    addUnitDependency(unit.deps, options, function () {
+      callback(null, unit);
     });
 
   });
 
 };
 
-
+/*
 ask.pickUnit = function (units) {
 
   var question = {
@@ -127,23 +102,13 @@ ask.identifyDeps = function (unknown) {
   });
 
 };
+*/
 
 
 ////////
 
 
-function prompt(questions) {
-    var deffered = Q.defer();
-    inquirer.prompt(questions, function (answers) {
-      deffered.resolve(answers);
-    });
-    return deffered.promise;
-}
-
-
-function addUnitDependency(deps) {
-
-  deps = deps || [];
+function addUnitDependency(deps, options, callback) {
 
   var nameQuestion = {
     type: 'input',
@@ -155,18 +120,19 @@ function addUnitDependency(deps) {
     type: 'list',
     name: 'type',
     message: 'Dependency type:',
-    choices: config.processedUnits
+    choices: options.providers
   };
 
-  return prompt(nameQuestion).then(function (nameAnswer) {
+  inquirer.prompt(nameQuestion, function (nameAnswer) {
 
     // exit when nothing entered
     if (!nameAnswer.name) {
       // resolve recursive chain with all collected deps
-      return deps;
+      callback();
+      return;
     }
 
-    return prompt(typeQuestion).then(function (typeAnswer) {
+    inquirer.prompt(typeQuestion, function (typeAnswer) {
       var dep = {
         name: nameAnswer.name,
         type: typeAnswer.type
@@ -174,9 +140,16 @@ function addUnitDependency(deps) {
       deps.push(dep);
 
       // recursive, pass deps array along the way until everything resolves
-      return addUnitDependency(deps);
+      addUnitDependency(deps, options, callback);
     });
 
   });
 
+}
+
+function required(input) {
+  if (_.isEmpty(_.trim(input))) {
+    return 'Value is required';
+  }
+  return true;
 }

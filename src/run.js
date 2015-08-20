@@ -37,8 +37,7 @@ run.use = function (usePathArg) {
 
   var exists = fs.existsSync(usePath);
   if (!exists) {
-    console.log('[tleaf]: Config file not found'); // TODO: throw?
-    return false;
+    return console.log('[tleaf]: Config file not found'); // TODO: throw?
   }
 
   cache.set('useConfig', usePath);
@@ -66,7 +65,12 @@ run.create = function (outputPathArg) {
   var outputPath = path.resolve(outputPathArg);
   var generateToPath = _.partial(generate, outputPath);
 
-  return ask.createUnit().then(generateToPath);
+  ask.createUnit({
+    units: config.processedUnits,
+    providers: config.processedProviders
+  }, function (err, unit) {
+    generateToPath(unit);
+  });
 };
 
 
@@ -75,27 +79,34 @@ run.parse = function (sourcePathArg, outputPathArg) {
   var sourcePath = path.resolve(sourcePathArg),
       outputPath = path.resolve(outputPathArg);
 
-  if (!fs.existsSync(sourcePath)) {
-    console.error('Source file not found');
-    return false;
+  var source = '';
+  try {
+    source = fs.readFileSync(sourcePath, 'utf8');
+  } catch (err) {
+    if (err === 'ENOENT') {
+      console.error('[tleaf]: Source file not found');
+      return false;
+    }
   }
-
-  var source = fs.readFileSync(sourcePath, 'utf8');
 
   var units = parse(source);
 
-  if (!units.length) {
-    console.error('Could not find any units');
+  var processedUnits = units.map(function (unit) {
+    return _.contains(config.processedUnits, unit.type);
+  });
+
+  if (!processedUnits.length) {
+    console.error('[tleaf]: Could not find any units');
     return false;
   }
 
   var generateToPath = _.partial(generate, outputPath);
 
-  if (units.length === 1) {
-    return identify(_.first(units)).then(generateToPath);
+  if (processedUnits.length === 1) {
+    return identify(_.first(processedUnits)).then(generateToPath);
   }
 
-  return ask.pickUnit(units).then(identify).then(generateToPath);
+  return ask.pickUnit(processedUnits).then(identify).then(generateToPath);
 };
 
 
