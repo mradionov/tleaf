@@ -22,6 +22,7 @@
     .provider('MyProvider', function () {
         this.$get = function (MyService1) {};
     })
+    .value('MyValue', 42)
     .constant('MyConstant', 42);
 
 }());

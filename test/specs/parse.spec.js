@@ -410,4 +410,19 @@ describe('parse', function () {
     }]);
   });
 
+  it('should extract value', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".value('test', 'test');";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'value',
+      name: 'test',
+      module: { name: 'test' },
+      deps: []
+    }]);
+  });
+
 });

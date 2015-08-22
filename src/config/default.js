@@ -11,7 +11,7 @@ module.exports = {
     // The order they appear can be changed by reodering these keys.
     process: [
       'controller', 'directive', 'factory', 'service',
-      'filter', 'provider', 'constant'
+      'filter', 'provider', 'value', 'constant'
     ]
 
   },

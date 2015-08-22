@@ -1,15 +1,15 @@
-describe('Value: MyValue', function () {
+describe('Value: {{name}}', function () {
 
-	var MyValue;
+	var {{name}};
 
 	beforeEach(function () {
 		// Load the value's module
-		module('app');
+		module('{{module}}');
 
 		// Inject in angular constructs otherwise,
 		//	you would need to inject these into each test
-		inject(function (_MyValue_) {
-			MyValue = _MyValue_;
+		inject(function (_{{name}}_) {
+			{{name}} = _{{name}}_;
 		});
 	});
 
