@@ -2,6 +2,8 @@
 
 var _ = require('lodash');
 
+var config = require('./config');
+
 ////////
 
 module.exports = filter;
@@ -9,10 +11,7 @@ module.exports = filter;
 ////////
 
 // TODO: cache identified deps for respective project
-function filter(all, options) {
-  options = _.defaults(options || {}, {
-    exclude: []
-  });
+function filter(all) {
 
   var deps = {
     known: [],
@@ -20,7 +19,7 @@ function filter(all, options) {
   };
 
   var filtered = _.filter(all, function (dep) {
-    return !_.contains(options.exclude, dep.name);
+    return !_.contains(config.filteredDependencies, dep.name);
   });
 
   deps.unknown = filtered;

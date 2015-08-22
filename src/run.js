@@ -2,8 +2,7 @@
 
 var fs = require('fs-extra'),
     path = require('path'),
-    _ = require('lodash'),
-    Q = require('q');
+    _ = require('../lib/lodash.mixin');
 
 var config = require('./config'),
     parse = require('./parse'),
@@ -24,7 +23,11 @@ run.init = function (initPathArg) {
   var initPath = path.resolve(initPathArg);
   var configFileName = 'config.js';
   var configPath = path.join(initPath, configFileName);
-  var defaultsPath = path.join(__dirname, 'src', 'defaults');
+  var defaultsPath = path.join(__dirname, 'defaults');
+
+  if (fs.existsSync(initPath)) {
+    return console.log('[tleaf]: Directory (or file) already exists at this location. Use another path.');
+  }
 
   fs.copySync(defaultsPath, initPath);
   cache.set('useConfig', configPath);
@@ -35,8 +38,7 @@ run.init = function (initPathArg) {
 run.use = function (usePathArg) {
   var usePath = path.resolve(usePathArg);
 
-  var exists = fs.existsSync(usePath);
-  if (!exists) {
+  if (!fs.existsSync(usePath)) {
     return console.log('[tleaf]: Config file not found'); // TODO: throw?
   }
 
@@ -63,19 +65,14 @@ run.current = function () {
 
 run.create = function (outputPathArg) {
   var outputPath = path.resolve(outputPathArg);
-  var generateToPath = _.partial(generate, outputPath);
 
-  ask.createUnit({
-    units: config.processedUnits,
-    providers: config.processedProviders
-  }, function (err, unit) {
-    generateToPath(unit);
+  ask.createUnit(function (unit) {
+    generate(unit, outputPath);
   });
 };
 
 
 run.parse = function (sourcePathArg, outputPathArg) {
-
   var sourcePath = path.resolve(sourcePathArg),
       outputPath = path.resolve(outputPathArg);
 
@@ -83,7 +80,7 @@ run.parse = function (sourcePathArg, outputPathArg) {
   try {
     source = fs.readFileSync(sourcePath, 'utf8');
   } catch (err) {
-    if (err === 'ENOENT') {
+    if (err.code === 'ENOENT') {
       console.error('[tleaf]: Source file not found');
       return false;
     }
@@ -91,7 +88,7 @@ run.parse = function (sourcePathArg, outputPathArg) {
 
   var units = parse(source);
 
-  var processedUnits = units.map(function (unit) {
+  var processedUnits = units.filter(function (unit) {
     return _.contains(config.processedUnits, unit.type);
   });
 
@@ -100,71 +97,46 @@ run.parse = function (sourcePathArg, outputPathArg) {
     return false;
   }
 
-  var generateToPath = _.partial(generate, outputPath);
+  units = _.sortByKeys(units, config.processedUnits, 'type');
 
-  if (processedUnits.length === 1) {
-    return identify(_.first(processedUnits)).then(generateToPath);
-  }
-
-  return ask.pickUnit(processedUnits).then(identify).then(generateToPath);
+  ask.pickUnit(units, function (pickedUnit) {
+    identify(pickedUnit, function (unit) {
+      generate(unit, outputPath);
+    });
+  });
 };
 
 
 ////////
 
 
-function identify(unit) {
-  var deferred = Q.defer();
-
-  var deps = filter(unit.deps, {
-    exclude: config.filteredDependencies
-  });
+function identify(unit, callback) {
+  var deps = filter(unit.deps);
 
   if (!deps.unknown.length) {
     unit.deps = deps.known;
-    deferred.resolve(unit);
-    return deferred.promise;
+    return callback(unit);
   }
 
-  return ask.identifyDeps(deps.unknown).then(function (identified) {
+  // sort before asking
+  var unknown = _.sortByKeys(deps.unknown, config.processedProviders, 'type');
+
+  ask.identifyDeps(unknown, function (identified) {
     unit.deps = deps.known.concat(identified);
-    return unit;
+    callback(unit);
   });
 }
 
-function sort(deps) {
-  var copy = deps.slice();
 
-  var order = config.processedProviders;
+function generate(unit, outputPath) {
 
-  copy.sort(function (depA, depB) {
-    var indexA = order.indexOf(depA.type),
-        indexB = order.indexOf(depB.type);
-    if (indexA > indexB) { return 1; }
-    if (indexA < indexB) { return -1; }
-    return 0;
-  });
-
-  return copy;
-}
-
-function generate(outputPath, unit) {
-
-  unit.deps = sort(unit.deps);
+  unit.deps = _.sortByKeys(unit.deps, config.processedProviders, 'type');
 
   var source = template.unit(unit.type);
 
   var data = serialize(unit);
 
-  var partials = {};
-  _.forEach(config.processedProviders, function (provider) {
-    partials[provider] = template.provider(provider);
-  });
-
-  var output = render(source, data, {
-    indent: config.indent,
-    partials: partials
-  });
+  var output = render(source, data);
 
   fs.writeFileSync(outputPath, output);
 }

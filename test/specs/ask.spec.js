@@ -12,27 +12,7 @@ var ask = proxyquire('../../src/ask', {
 
 describe('ask', function () {
 
-  describe.only('createUnit', function () {
-
-    it('should throw an error when there is no units to process', function () {
-      ask.createUnit({ providers: ['factory'] }, function (err) {
-        assert.ok(err instanceof Error);
-      });
-    });
-
-    it('should throw an error when there is no providers to process', function () {
-      ask.createUnit({ units: ['factory'] }, function (err) {
-        assert.ok(err instanceof Error);
-      });
-    });
-
-    it('should pass units option to type question', function () {
-      inquirerStub.prompt = function (questions) {
-        var typeQuestion = _.findWhere(questions, { name: 'type' });
-        assert.deepEqual(typeQuestion.choices, ['service', 'directive']);
-      };
-      ask.createUnit({ units: ['service', 'directive'] });
-    });
+  describe('createUnit', function () {
 
     it('should create unit without dependencies', function () {
       inquirerStub.prompt = function (questions, respond) {
@@ -45,9 +25,7 @@ describe('ask', function () {
           module: 'test'
         });
       };
-      ask.createUnit({
-        units: ['controller'], providers: ['factory']
-      }, function (err, unit) {
+      ask.createUnit({}, function (err, unit) {
         assert.deepEqual(unit, {
           name: 'TestCtrl',
           type: 'controller',
@@ -59,14 +37,14 @@ describe('ask', function () {
 
     it('should create unit with dependencies', function () {
       inquirerStub.prompt = function (questions, respond) {
-        inquirerStub.prompt = function (questions, repsond) {
+        inquirerStub.prompt = function (questions, respond) {
           inquirerStub.prompt = function (questions, respond) {
-            inquirerStub.prompt = function (questions, respond) {
-              respond({ name: '' });
-            };
-            respond({ type: 'factory' });
+            respond({ name: '' });
           };
-          respond({ name: 'MyFactory' });
+          respond({
+            name: 'TestFactory',
+            type: 'factory'
+          });
         };
         respond({
           name: 'TestCtrl',
@@ -74,21 +52,59 @@ describe('ask', function () {
           module: 'test'
         });
       };
-      ask.createUnit({
-        units: ['controller'], providers: ['factory']
-      }, function (err, unit) {
+      ask.createUnit({}, function (err, unit) {
         assert.deepEqual(unit, {
           name: 'TestCtrl',
           type: 'controller',
           module: { name: 'test' },
           deps: [
-            { name: 'MyFactory', type: 'factory' }
+            { name: 'TestFactory', type: 'factory' }
           ]
+        });
+      });
+
+    });
+
+  });
+
+  describe('pickUnit', function () {
+
+    it('should pick a unit', function () {
+      inquirerStub.prompt = function (question, respond) {
+        respond({ unit: 1 });
+      };
+      ask.pickUnit([
+        { name: 'TestFactory', type: 'factory', module: { name: 'test' } },
+        { name: 'TestService', type: 'service', module: { name: 'test' } },
+        { name: 'TestProvider', type: 'provider', module: { name: 'test' } }
+      ], function (err, unit) {
+        assert.deepEqual(unit, {
+          name: 'TestService', type: 'service', module: { name: 'test' }
         });
       });
     });
 
   });
 
+  describe('identifyDeps', function () {
+
+    it('should identify deps', function () {
+      inquirerStub.prompt = function (question, respond) {
+        respond({ '0': 'factory', '1': 'service', '2': 'provider' });
+      };
+      ask.identifyDeps([
+        { name: 'TestFactory' },
+        { name: 'TestService' },
+        { name: 'TestProvider' }
+      ], {}, function (err, deps) {
+        assert.deepEqual(deps, [
+          { name: 'TestFactory', type: 'factory' },
+          { name: 'TestService', type: 'service' },
+          { name: 'TestProvider', type: 'provider' }
+        ]);
+      });
+    });
+
+  });
 
 });

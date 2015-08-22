@@ -17,4 +17,6 @@ if (useConfigPath && fs.existsSync(useConfigPath)) {
 
 var resolvedConfig = _.merge({}, defaultConfig, useConfig);
 
+// TODO: check if processedUnits and processedProviders are empty
+
 module.exports = resolvedConfig;

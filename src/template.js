@@ -39,9 +39,6 @@ function load(type, relativePath) {
 
     if (fs.existsSync(useTemplatePath)) {
       templatePath = useTemplatePath;
-    } else {
-      console.error('Custom template is missing for type "%s"', type);
-      console.error('Falling back default template');
     }
   }
 
