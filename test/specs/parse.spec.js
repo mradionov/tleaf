@@ -395,4 +395,19 @@ describe('parse', function () {
     }]);
   });
 
+  it('should extract constant', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".constant('TEST', 'test');";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'constant',
+      name: 'TEST',
+      module: { name: 'test' },
+      deps: []
+    }]);
+  });
+
 });

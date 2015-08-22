@@ -10,7 +10,8 @@ module.exports = {
     // here will be parsed and asked about.
     // The order they appear can be changed by reodering these keys.
     process: [
-      'controller', 'directive', 'factory', 'service', 'filter', 'provider'
+      'controller', 'directive', 'factory', 'service',
+      'filter', 'provider', 'constant'
     ]
 
   },

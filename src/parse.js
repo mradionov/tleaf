@@ -5,14 +5,13 @@ var esprima = require('esprima'),
     escope = require('escope'),
     _ = require('lodash');
 
-var TYPES = [
-  'controller',
-  'directive',
-  'filter',
-  'service',
-  'factory',
-  'provider'
-];
+var config = require('./config');
+
+////////
+
+module.exports = parse;
+
+////////
 
 
 function parse(source) {
@@ -32,13 +31,12 @@ function parse(source) {
 
       if (node.type === 'CallExpression') {
 
-        if (_.contains(TYPES, _.get(node, 'callee.property.name'))) {
-
+        var type = _.get(node, 'callee.property.name');
+        if (_.contains(config.units.process, type)) {
           calls.push({
             node: node,
             scope: currentScope
           });
-
         }
 
       }
@@ -60,25 +58,25 @@ function parse(source) {
   var units = [];
 
   calls.forEach(function (call) {
-
-    var name = findName(call.node, call.scope);
+    // deps depend on type
     var type = findType(call.node, call.scope);
-    var module = findModule(call.node, call.scope);
-    var deps = findDeps(call.node, call.scope, type);
 
     var unit = {
-      name: name,
+      name: findName(call.node, call.scope),
       type: type,
-      module: module,
-      deps: deps
+      module: findModule(call.node, call.scope),
+      deps: findDeps(call.node, call.scope, type)
     };
 
     units.unshift(unit);
-
   });
 
   return units;
 }
+
+
+////////
+
 
 function findName(callExpression) {
   var name;
@@ -91,9 +89,11 @@ function findName(callExpression) {
   return name;
 }
 
+
 function findType(callExpression) {
   return callExpression.callee.property.name;
 }
+
 
 // TODO: is "module" a reserved word in node.js? is it safe to use? if scoped?
 // TODO: multiple variable definitions
@@ -114,7 +114,7 @@ function findModule(callExpression, scope) {
 
       module.name = callExpression.arguments[0].value;
 
-    } else if (_.contains(TYPES, callExpression.callee.property.name)) {
+    } else if (_.contains(config.units.process, callExpression.callee.property.name)) {
 
       var varName = callExpression.callee.object.name;
       var varNode = findVariable(varName, scope);
@@ -129,13 +129,15 @@ function findModule(callExpression, scope) {
   return module;
 }
 
+
 // TODO: multiple variable definitions
 function findDeps(callExpression, scope, type) {
 
   var deps = [];
+  var cantHaveDeps = ['filter', 'value', 'constant'];
 
   // filter can't have dependenices
-  if (type === 'filter') {
+  if (_.contains(cantHaveDeps, type)) {
     return [];
   }
 
@@ -261,8 +263,8 @@ function findDeps(callExpression, scope, type) {
   return deps;
 }
 
-// TODO: expose to make testable
 
+// TODO: expose to make testable
 function extractDeps(params) {
   var deps = [];
 
@@ -279,6 +281,7 @@ function extractDeps(params) {
 
   return deps;
 }
+
 
 function findVariable(varName, scope) {
 
@@ -298,6 +301,7 @@ function findVariable(varName, scope) {
 
   return node;
 }
+
 
 function extractVariableDeps(varName, scope) {
 
@@ -319,10 +323,9 @@ function extractVariableDeps(varName, scope) {
   return deps;
 }
 
+
 function findScope(ast) {
   var scopeManager = escope.analyze(ast);
   var scope = scopeManager.acquire(ast);
   return scope;
 }
-
-module.exports = parse;
