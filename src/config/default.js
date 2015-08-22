@@ -24,7 +24,18 @@ module.exports = {
 
     // Exclude particular providers, there won't be any test code generated
     // for them.
-    filter: ['$scope']
+    filter: ['$scope'],
+
+    // TODO: map to template path?
+    // Map provider type to a respective template. Can be helpful in case
+    // when one wants to mock services and factories with values.
+    templateMap: {
+      'provider': 'provider',
+      'service': 'service',
+      'factory': 'factory',
+      'value': 'value',
+      'constant': 'constant'
+    }
 
   }
 

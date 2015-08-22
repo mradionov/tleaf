@@ -3,7 +3,8 @@
 var fs = require('fs'),
     path = require('path');
 
-var cache = require('./cache');
+var cache = require('./cache'),
+    config = require('./config');
 
 ////////
 
@@ -20,7 +21,8 @@ template.unit = function (type) {
 
 
 template.provider = function (type) {
-  return load(type, path.join('templates', 'providers'));
+  var mappedType = config.providers.templateMap[type] || type;
+  return load(mappedType, path.join('templates', 'providers'));
 };
 
 ////////
