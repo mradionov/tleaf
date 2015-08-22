@@ -35,7 +35,7 @@ describe('Directive: {{name}}', function () {
 
 		// Inject in angular constructs otherwise,
 		//	you would need to inject these into each test
-		inject(function ($rootScope, $compile{{and  arg._deps_ }}) {
+		inject(function ($rootScope, $compile{{and arg._deps_ }}) {
 			scope = $rootScope.$new();
 			compile = $compile;
 

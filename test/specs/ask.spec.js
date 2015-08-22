@@ -25,7 +25,7 @@ describe('ask', function () {
           module: 'test'
         });
       };
-      ask.createUnit({}, function (err, unit) {
+      ask.createUnit(function (unit) {
         assert.deepEqual(unit, {
           name: 'TestCtrl',
           type: 'controller',
@@ -52,7 +52,7 @@ describe('ask', function () {
           module: 'test'
         });
       };
-      ask.createUnit({}, function (err, unit) {
+      ask.createUnit(function (unit) {
         assert.deepEqual(unit, {
           name: 'TestCtrl',
           type: 'controller',
@@ -77,7 +77,7 @@ describe('ask', function () {
         { name: 'TestFactory', type: 'factory', module: { name: 'test' } },
         { name: 'TestService', type: 'service', module: { name: 'test' } },
         { name: 'TestProvider', type: 'provider', module: { name: 'test' } }
-      ], function (err, unit) {
+      ], function (unit) {
         assert.deepEqual(unit, {
           name: 'TestService', type: 'service', module: { name: 'test' }
         });
@@ -96,7 +96,7 @@ describe('ask', function () {
         { name: 'TestFactory' },
         { name: 'TestService' },
         { name: 'TestProvider' }
-      ], {}, function (err, deps) {
+      ], function (deps) {
         assert.deepEqual(deps, [
           { name: 'TestFactory', type: 'factory' },
           { name: 'TestService', type: 'service' },

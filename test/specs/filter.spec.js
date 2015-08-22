@@ -1,8 +1,13 @@
 'use strict';
 
 var assert = require('chai').assert;
+var proxyquire = require('proxyquire');
 
-var filter = require('./../../src/filter');
+var configStub = {};
+
+var filter = proxyquire('./../../src/filter', {
+  './config': configStub
+});
 
 describe('filter', function () {
 
@@ -19,6 +24,7 @@ describe('filter', function () {
   });
 
   it('should move all deps to unknown', function () {
+    configStub.providers.filter = [];
     var result = filter(unit.deps);
     assert.deepEqual(result, {
       known: [],
@@ -31,7 +37,8 @@ describe('filter', function () {
   });
 
   it('should exclude deps if set', function () {
-    var result = filter(unit.deps, { exclude: ['$scope', 'MyDir'] });
+    configStub.providers.filter = ['$scope', 'MyDir'];
+    var result = filter(unit.deps);
     assert.deepEqual(result, {
       known: [],
       unknown: [
