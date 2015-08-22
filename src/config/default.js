@@ -4,16 +4,28 @@ module.exports = {
   // You can pass integer and it will be a number of spaces for indentation
   indent: '\t',
 
-  // List the unit types which should be processed
-  processedUnits: [
-    'controller', 'directive', 'factory', 'service', 'filter', 'provider'
-  ],
+  units: {
 
-  processedProviders: [
-    'constant', 'factory', 'service', 'value', 'provider'
-  ],
+    // List the unit types which should be processed. Only the types mentioned
+    // here will be parsed and asked about.
+    // The order they appear can be changed by reodering these keys.
+    process: [
+      'controller', 'directive', 'factory', 'service', 'filter', 'provider'
+    ]
 
-  filteredDependencies: [
-    '$scope'
-  ]
+  },
+
+  providers: {
+
+    // List the providers which should be processed. Only the types mentioned
+    // here will be asked about and be included in generated test code.
+    // The order they appear can be changed by reodering these keys
+    process: ['provider', 'service', 'factory', 'value', 'constant'],
+
+    // Exclude particular providers, there won't be any test code generated
+    // for them.
+    filter: ['$scope']
+
+  }
+
 };

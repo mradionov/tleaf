@@ -49,7 +49,7 @@ function registerHelpers() {
 
 
 function registerPartials() {
-  _.forEach(config.processedProviders, function (name) {
+  _.forEach(config.providers.process, function (name) {
     var source = template.provider(name);
     Handlebars.registerPartial(name, source);
   });

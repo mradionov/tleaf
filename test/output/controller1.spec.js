@@ -1,6 +1,6 @@
 describe('Controller: FirstCtrl', function () {
 
-	var scope, FirstCtrl, MyService1, MyService2, $state;
+	var scope, FirstCtrl, $state, MyService1, MyService2;
 
 	// Initialize the controller and scope
 	beforeEach(function () {
@@ -9,27 +9,23 @@ describe('Controller: FirstCtrl', function () {
 		module('app');
 
 		module(function ($provide) {
-			$provide.service('MyService1', function () {
-			
-			});
-			$provide.service('MyService2', function () {
-			
-			});
 			$provide.provider('$state', function () {
 				this.$get = function () {
 					return {};
 				};
 			});
+			$provide.value('MyService1', {});
+			$provide.value('MyService2', {});
 		});
 
 		// Inject in angular constructs otherwise,
 		//	you would need to inject these into each test
-		inject(function ($controller, _MyService1_, _MyService2_, _$state_) {
+		inject(function ($controller, _$state_, _MyService1_, _MyService2_) {
 			scope = {};
 
+			$state = _$state_;
 			MyService1 = _MyService1_;
 			MyService2 = _MyService2_;
-			$state = _$state_;
 
 			FirstCtrl = $controller('FirstCtrl', {
 				$scope: scope

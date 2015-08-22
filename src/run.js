@@ -89,7 +89,7 @@ run.parse = function (sourcePathArg, outputPathArg) {
   var units = parse(source);
 
   var processedUnits = units.filter(function (unit) {
-    return _.contains(config.processedUnits, unit.type);
+    return _.contains(config.units.process, unit.type);
   });
 
   if (!processedUnits.length) {
@@ -97,7 +97,7 @@ run.parse = function (sourcePathArg, outputPathArg) {
     return false;
   }
 
-  units = _.sortByKeys(units, config.processedUnits, 'type');
+  units = _.sortByKeys(units, config.units.process, 'type');
 
   ask.pickUnit(units, function (pickedUnit) {
     identify(pickedUnit, function (unit) {
@@ -119,7 +119,7 @@ function identify(unit, callback) {
   }
 
   // sort before asking
-  var unknown = _.sortByKeys(deps.unknown, config.processedProviders, 'type');
+  var unknown = _.sortByKeys(deps.unknown, config.providers.process, 'type');
 
   ask.identifyDeps(unknown, function (identified) {
     unit.deps = deps.known.concat(identified);
@@ -130,7 +130,7 @@ function identify(unit, callback) {
 
 function generate(unit, outputPath) {
 
-  unit.deps = _.sortByKeys(unit.deps, config.processedProviders, 'type');
+  unit.deps = _.sortByKeys(unit.deps, config.providers.process, 'type');
 
   var source = template.unit(unit.type);
 

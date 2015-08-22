@@ -12,11 +12,13 @@ var defaultConfig = require('./default');
 var useConfig = {};
 var useConfigPath = cache.get('useConfig');
 if (useConfigPath && fs.existsSync(useConfigPath)) {
-    useConfig = require(useConfigPath);
+  // load custom config as module
+  useConfig = require(useConfigPath);
 }
 
+// deep merge configs
 var resolvedConfig = _.merge({}, defaultConfig, useConfig);
 
-// TODO: check if processedUnits and processedProviders are empty
+// TODO: check if units.process and providers.process are empty
 
 module.exports = resolvedConfig;

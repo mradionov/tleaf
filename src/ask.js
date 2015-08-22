@@ -18,7 +18,7 @@ ask.createUnit = function(callback) {
       type: 'list',
       name: 'type',
       message: 'Unit type:',
-      choices: config.processedUnits
+      choices: config.units.process
     },
     {
       type: 'input',
@@ -90,7 +90,7 @@ ask.identifyDeps = function (deps, callback) {
       type: 'list',
       name: index.toString(),
       message: 'What is a type of "' + dep.name + '"?',
-      choices: config.processedUnits
+      choices: config.units.process
     };
   });
 
