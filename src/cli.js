@@ -1,7 +1,8 @@
 'use strict';
 
 var _ = require('lodash');
-var run = require('./run');
+var run = require('./run'),
+    log = require('./log');
 
 ////////
 
@@ -49,7 +50,7 @@ default:
 
 function validate(expression, message, command) {
   if (expression) { return; }
-  console.log('[tleaf]: %s', message);
+  log(message);
   if (command) {
     help(command);
   }
@@ -115,5 +116,5 @@ function help(one) {
     }
   });
 
-  console.log(output);
+  log.pure(output);
 }

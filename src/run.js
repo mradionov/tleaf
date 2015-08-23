@@ -11,7 +11,8 @@ var config = require('./config'),
     cache = require('./cache'),
     serialize = require('./serialize'),
     render = require('./render'),
-    template = require('./template');
+    template = require('./template'),
+    log = require('./log');
 
 ////////
 
@@ -26,7 +27,8 @@ run.init = function (initPathArg) {
   var defaultsPath = path.join(__dirname, 'defaults');
 
   if (fs.existsSync(initPath)) {
-    return console.log('[tleaf]: Directory (or file) already exists at this location. Use another path.');
+    return log('Directory (or file) already exists at this location. ' +
+               'Use another path.');
   }
 
   fs.copySync(defaultsPath, initPath);
@@ -39,7 +41,7 @@ run.use = function (usePathArg) {
   var usePath = path.resolve(usePathArg);
 
   if (!fs.existsSync(usePath)) {
-    return console.log('[tleaf]: Config file not found'); // TODO: throw?
+    return log('Config file not found');
   }
 
   cache.set('useConfig', usePath);
@@ -56,9 +58,9 @@ run.default = function () {
 run.current = function () {
   var usePath = cache.get('useConfig');
   if (!usePath) {
-    console.log('[tleaf]: Using default config'); // TODO: custom logger?
+    log('Using default config');
   } else {
-    console.log('[tleaf]: Current config path: %s', usePath);
+    log('Current config path: %s', usePath);
   }
 };
 
@@ -81,8 +83,7 @@ run.parse = function (sourcePathArg, outputPathArg) {
     source = fs.readFileSync(sourcePath, 'utf8');
   } catch (err) {
     if (err.code === 'ENOENT') {
-      console.error('[tleaf]: Source file not found');
-      return false;
+      return log('Source file not found');
     }
   }
 
@@ -93,8 +94,7 @@ run.parse = function (sourcePathArg, outputPathArg) {
   });
 
   if (!processedUnits.length) {
-    console.error('[tleaf]: Could not find any units');
-    return false;
+    return log('Could not find any units');
   }
 
   units = _.sortByKeys(units, config.units.process, 'type');
