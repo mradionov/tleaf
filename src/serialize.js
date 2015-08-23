@@ -2,11 +2,11 @@
 
 var _ = require('lodash');
 
+////////
 
-function wrap(string, wrapper) {
-  wrapper = wrapper || '_';
-  return wrapper + string + wrapper;
-}
+module.exports = serialize;
+
+////////
 
 
 // TODO: decide whether should recreate unit if it is bad or throw errors
@@ -44,4 +44,11 @@ function serialize(unit) {
   return data;
 }
 
-module.exports = serialize;
+
+////////
+
+
+function wrap(string, wrapper) {
+  wrapper = wrapper || '_';
+  return wrapper + string + wrapper;
+}

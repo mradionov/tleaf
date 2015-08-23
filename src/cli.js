@@ -48,6 +48,7 @@ default:
 
 ////////
 
+
 function validate(expression, message, command) {
   if (expression) { return; }
   log(message);
@@ -56,6 +57,7 @@ function validate(expression, message, command) {
   }
   process.exit(0);
 }
+
 
 function help(one) {
 

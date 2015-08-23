@@ -5,7 +5,8 @@ var esprima = require('esprima'),
     escope = require('escope'),
     _ = require('lodash');
 
-var config = require('./config');
+var config = require('./config'),
+    log = require('./log');
 
 ////////
 
@@ -18,7 +19,16 @@ function parse(source) {
 
   // TODO: can throw exceptions because of bad code
   // consider re-throwing it, do not use promises or callbacks, keep it sync
-  var ast = esprima.parse(source);
+
+  var ast;
+  try {
+    ast = esprima.parse(source);
+  } catch (err) {
+    log('Source file is not valid');
+    log.pure('Error: %s', err.message);
+    throw err;
+  }
+
   var scopeManager = escope.analyze(ast);
 
   // global scope
@@ -294,7 +304,7 @@ function findVariable(varName, scope) {
   }
 
   if (!variable) {
-    return undefined;
+    return void 0;
   }
 
   var node = _.first(variable.defs).node;

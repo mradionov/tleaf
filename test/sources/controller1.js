@@ -10,7 +10,10 @@
     .controller('SecondCtrl', function () {
 
     })
-    .service('MyService1', function ($http, MyService2) {
+
+
+
+    ervice('MyService1', function ($http, MyService2) {
 
     })
     .factory('MyFactory1', function ($http, MyService1) {
@@ -23,6 +26,6 @@
         this.$get = function (MyService1) {};
     })
     .value('MyValue', 42)
-    .constant('MyConstant', 42);
+    .constant('MyConstant' 42);
 
 }());
