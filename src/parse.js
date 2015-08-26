@@ -274,7 +274,6 @@ function findDeps(callExpression, scope, type) {
 }
 
 
-// TODO: expose to make testable
 function extractDeps(params) {
   var deps = [];
 
