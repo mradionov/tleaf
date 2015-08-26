@@ -70,11 +70,18 @@ function parse(source) {
   calls.forEach(function (call) {
     // deps depend on type
     var type = findType(call.node, call.scope);
+    var module = findModule(call.node, call.scope);
+
+    // unit must have a module, otherwise it can be a simple function call
+    // which has the same name as some unit type
+    if (_.isUndefined(module.name)) {
+      return;
+    }
 
     var unit = {
       name: findName(call.node, call.scope),
       type: type,
-      module: findModule(call.node, call.scope),
+      module: module,
       deps: findDeps(call.node, call.scope, type)
     };
 
@@ -108,9 +115,7 @@ function findType(callExpression) {
 // TODO: is "module" a reserved word in node.js? is it safe to use? if scoped?
 // TODO: multiple variable definitions
 function findModule(callExpression, scope) {
-  var module = {
-    name: ''
-  };
+  var module = {};
 
   if (callExpression.callee.object.type === 'CallExpression') {
 

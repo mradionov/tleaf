@@ -189,4 +189,23 @@ describe('parse/unit', function () {
     }]);
   });
 
+  it('should not consider another function calls as units', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".controller('TestController', function () {" +
+    " var a = [1,2,3].filter(function (n) {" +
+    "   return n > 1;" +
+    " });" +
+    "})";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'controller',
+      name: 'TestController',
+      module: { name: 'test' },
+      deps: []
+    }]);
+  });
+
 });
