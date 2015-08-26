@@ -3,7 +3,7 @@ tleaf
 
 > AngularJS unit test generator
 
-Command line [npm](https://www.npmjs.com/) utility module built on [Node.js](https://nodejs.org/) to generate [AngularJS](https://angularjs.org/) unit tests based on existing code or create them from scratch.
+Command line [npm](https://www.npmjs.com/) utility tool built on [Node.js](https://nodejs.org/) to generate [AngularJS](https://angularjs.org/) unit tests based on existing code or create them from scratch.
 
 ## Installation
 
@@ -22,7 +22,7 @@ tleaf [/path/to/source.js] [/path/to/output.spec.js]
 * `[/path/to/source.js]` - path to AngularJS source code with a unit to test
 * `[/path/to/output.spec.js]` - path to output test file
 
-The command parses your source file and extract all AngularJS units (`controller`, `service`, etc.). After that you will be asked which one you'd want to test and what are the types of the dependencies. The result will be a test file, based on template for this unit type, with unit, module and dependencies set up.
+The command parses your source file and extracts all AngularJS units (*controllers*, *services*, etc.). After that you will be asked which one you'd want to test and what are the types of unit's dependencies. The result will be a test file based on template for this unit type.
 
 ***
 
@@ -32,7 +32,7 @@ tleaf create [/path/to/output.spec.js]
 
 * `[/path/to/output.spec.js]` - path to output test file
 
-The command creates a test file based on answers you provide for a number of questions: what's a name of the unit? what's it's type? what are it's dependencies? The result will be a test file, based on template for this unit type, with unit, module and dependencies set up.
+The command creates a test file based on answers you provide for a number of questions: what is a name of the unit? what is a type of the unit? what are unit's dependencies? The result will be a test file based on template for this unit type.
 
 ***
 
@@ -42,7 +42,7 @@ tleaf init [/path/to/folder]
 
 * `[/path/to/folder]` - path to output folder
 
-The command copies templates, which are used to create test files by default, to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. Copied folder will also contain a configuration file for additional options. This folder can be created anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be (but does not have to) included under version control systems, it's up to you.
+The command copies default templates to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. That folder will also contain a configuration file for additional options called `config.js`. This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be included under version control system, but it is not required at all, it's up to you.
 
 ***
 
@@ -72,29 +72,76 @@ tleaf current
 
 ## Configuration
 
-When you run the command `tleaf init [/path/to/folder]`, all default templates and configuration file are copied to the location you've provided.
+When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
 
 #### Configuration file
 
 By default configuration file `config.js` is empty, the default configuration is used ([see default configuration file](src/config/default.js)). Available options:
 
-* `indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces which replace one tab.
+* `indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces to replace one tab.
 
-  ```
+  ```js
   module.exports = {
     indent: '  '    // 1 tab = 2 spaces,
     indent: '\t'    // 1 tab = 1 tab
     indent: 4       // 1 tab = 4 spaces
     indent: '--'    // 1 tab = '--'
-  }
+  };
+  ```
+* `units.process: [array]` - array of unit types which should be parsed and processed. To reorder the appearance of unit types change their order in this array.
+
+  ```js
+  module.exports = {
+    units: {
+      // process only controllers, directives and providers
+      // these types will appear in the exact same order
+      process: ['controller', 'directive', 'provider']
+    }
+  };
   ```
 
-TODO: rest of the options
+* `providers.process: [array]` - array of provider types which should be parsed and processed. To reorder the appearance of provider types change their order in this array.
+
+  ```js
+  module.exports = {
+    providers: {
+      // process only services and values, others will be ignored
+      // these types will appear in the exact same order, which means that
+      // all services will be rendered first, then all the values, etc.
+      process: ['service', 'value']
+    }
+  };
+  ```
+
+* `providers.filter: [array]` - array of provider names, which should be ignored, by default only `$scope` and `$rootScope` are filtered out.
+
+  ```js
+  module.exports = {
+    providers: {
+      // ignore dependencies with these names
+      filter: ['$scope', '$rootScope', 'GlobalService', 'SECRET_CONST']
+    }
+  };
+  ```
+
+* `providers.templateMap: [object]` - object, which maps provider types with templates they should use. May be useful, when you want to render *factories* or *services* using *value* template.
+
+  ```js
+  module.exports = {
+    providers: {
+      templateMap: {
+        'provider': 'provider', // use default provider template
+        'service': 'value',     // use value template for service
+        'factory': 'service'    // use service template for factory
+      }
+    }
+  };
+  ```
 
 #### Templates
 
-Test files are generated from the templates, which are kinda like JavaScript files, but they get processed like templates to fill it with collected data. Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), template for provider is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are made by taking already existing ones as a sample.
-Templates are processed by templating engine [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
+Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to fill it with the gathered data. Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are completed by taking already existing ones as an example.
+Templates are processed by the templating engine called [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
 
 ###### Available data
 
@@ -176,7 +223,7 @@ Information, which is being collected by a parser or from your answers, gets pas
 }
 ```
 
-Basically it is a global object in templates and you can use it just like `{{name}}` (renders into `UserController`).
+Consider it a global object in your templates.
 
 ###### Template examples
 
@@ -239,18 +286,22 @@ You can discover more use-cases by looking at [default templates](src/defaults/t
 
 ###### Additional template helpers
 
-* `{{only array}}` - joins array of strings, like `Array.join(', ')`;
+* `{{only array}}` - joins array of strings with `", "`:
 
   ```js
   $http, UserService, API_KEY
   ```
 
-* `{{and array}}` - joins array of string, like `Array.join(', ')`, but also prepends the string with leading `,` comma;
+* `{{and array}}` - joins array of strings with `", "`, but also adds extra `", "` in front:
 
   ```js
   , $http, UserService, API_KEY
   ```
 
-* `{{dashCase string}}` - converts string to dash case (`"ngBindHtml"` => `"ng-bind-html"`);
+* `{{dashCase string}}` - converts string to dash-case, useful when working with directives:
 
-* `{{defaults value defaultValue}}` - renders a `value`, or `defaultValue` if `value` is `undefined`.
+  ```
+  "ngBindHtml" => "ng-bind-html"
+  ```
+
+* `{{defaults value defaultValue}}` - renders *value* if it is not *undefined*, *defaultValue* otherwise.
