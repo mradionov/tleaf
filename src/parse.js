@@ -38,11 +38,14 @@ function parse(source) {
 
   estraverse.traverse(ast, {
     enter: function (node) {
-
+      // find all call expressions, because all angular unit types are
+      // defined as function calls: .controller(), .service(), etc
       if (node.type === 'CallExpression') {
 
-        var type = _.get(node, 'callee.property.name');
-        if (_.contains(config.units.process, type)) {
+        var calleeProp = _.get(node, 'callee.property', {});
+
+        if (_.contains(config.units.process, calleeProp.name)) {
+          // save matching node with an appropriate scope
           calls.push({
             node: node,
             scope: currentScope
@@ -51,32 +54,33 @@ function parse(source) {
 
       }
 
+      // update current scope while traversing
+      // taken from original repository: https://github.com/estools/escope
       if (/Function/.test(node.type)) {
         currentScope = scopeManager.acquire(node);
       }
     },
     leave: function (node) {
-
       if (/Function/.test(node.type)) {
         currentScope = currentScope.upper;
       }
-
     }
   });
 
 
   var units = [];
 
-  calls.forEach(function (call) {
-    // deps depend on type
-    var type = findType(call.node, call.scope);
-    var module = findModule(call.node, call.scope);
+  _.forEach(calls, function (call) {
 
+    var module = findModule(call.node, call.scope);
     // unit must have a module, otherwise it can be a simple function call
     // which has the same name as some unit type
     if (_.isUndefined(module.name)) {
       return;
     }
+
+    // deps depend on type, different unit types have deps defined differently
+    var type = findType(call.node, call.scope);
 
     var unit = {
       name: findName(call.node, call.scope),
@@ -98,7 +102,7 @@ function parse(source) {
 function findName(callExpression) {
   var name;
 
-  var nameArg = callExpression.arguments[0] || {};
+  var nameArg = _.get(callExpression, 'arguments[0]', {});
   if (nameArg.type === 'Literal') {
     name = nameArg.value;
   }
@@ -108,7 +112,7 @@ function findName(callExpression) {
 
 
 function findType(callExpression) {
-  return callExpression.callee.property.name;
+  return _.get(callExpression, 'callee.property.name');
 }
 
 
@@ -117,24 +121,26 @@ function findType(callExpression) {
 function findModule(callExpression, scope) {
   var module = {};
 
-  if (callExpression.callee.object.type === 'CallExpression') {
+  var calleeObj = _.get(callExpression, 'callee.object', {}),
+      calleeProp = _.get(callExpression, 'callee.property', {});
 
-    return findModule(callExpression.callee.object, scope);
+  if (calleeObj.type === 'CallExpression') {
+    // recursive find module, usually when units are chained
+    return findModule(calleeObj, scope);
 
-  } else if (callExpression.callee.object.type === 'Identifier') {
+  } else if (calleeObj.type === 'Identifier') {
+    // when reaching module variable it can be in a form of "angular.module(..)"
+    if (calleeProp.name === 'module' && calleeObj.name === 'angular') {
 
-    if (callExpression.callee.property.name === 'module' &&
-        callExpression.callee.object.name === 'angular'
-    ) {
+      module.name = _.get(callExpression, 'arguments[0].value');
 
-      module.name = callExpression.arguments[0].value;
+    // or module can be stored in variable; find this variable then
+    } else if (_.contains(config.units.process, calleeProp.name)) {
 
-    } else if (_.contains(config.units.process, callExpression.callee.property.name)) {
-
-      var varName = callExpression.callee.object.name;
+      var varName = calleeObj.name;
       var varNode = findVariable(varName, scope);
       if (varNode) {
-        module.name = varNode.init.arguments[0].value;
+        module.name = _.get(varNode, 'init.arguments[0].value');
       }
 
     }
@@ -148,141 +154,123 @@ function findModule(callExpression, scope) {
 // TODO: multiple variable definitions
 function findDeps(callExpression, scope, type) {
 
-  var deps = [];
   var cantHaveDeps = ['filter', 'value', 'constant'];
-
-  // filter can't have dependenices
   if (_.contains(cantHaveDeps, type)) {
     return [];
   }
 
-  var depsArg = callExpression.arguments[1] || {};
+  // first argument is a name of the unit, second - usually has deps
+  var depsArg = _.get(callExpression, 'arguments[1]', {});
+  var deps = [];
 
-  //
-
+  // deps can be provided explicitly as an array
+  // in this case a body of the unit is the last array element
   if (depsArg.type === 'ArrayExpression') {
-
-    depsArg = _.last(depsArg.elements) || {};
-
-    if (depsArg.type === 'FunctionExpression') {
-      deps = extractDeps(depsArg.params);
-      return deps;
+    var lastDepsArg = _.last(depsArg.elements) || {};
+    if (lastDepsArg.type === 'FunctionExpression') {
+      return extractDeps(lastDepsArg.params);
     }
-
   }
 
-  //
-
+  // deps in a form of function expression can be stored in variable
   if (depsArg.type === 'Identifier') {
-
-    var varName = depsArg.name;
-
-    deps = extractVariableDeps(varName, scope);
-
-    return deps;
+    return extractVariableDeps(depsArg.name, scope);
   }
 
-  //
-
+  // deps in a form of function expression
   if (depsArg.type === 'FunctionExpression') {
 
+    // everything except provider usually stores deps as function arguments
     if (type !== 'provider') {
-      deps = extractDeps(depsArg.params);
-      return deps;
+      return extractDeps(depsArg.params);
     }
 
-    if (depsArg.body.type === 'BlockStatement') {
-      var bodyExpressions = depsArg.body.body;
-
-      // debugger;
-
-      bodyExpressions.some(function (bodyExpression) {
-
-        if (bodyExpression.type === 'ExpressionStatement' &&
-            bodyExpression.expression.left.property.name === '$get'
-        ) {
-
-          if (bodyExpression.expression.right.type === 'FunctionExpression') {
-            deps = extractDeps(bodyExpression.expression.right.params);
-            return true;
-          }
-
-          if (bodyExpression.expression.right.type === 'Identifier') {
-
-            var varName = bodyExpression.expression.right.name;
-            var blockScope = findScope(depsArg);
-
-            deps = extractVariableDeps(varName, blockScope);
-            return true;
-          }
-
-        } else if (bodyExpression.type === 'ReturnStatement') {
-
-          if (bodyExpression.argument.type === 'ObjectExpression') {
-            var properties = bodyExpression.argument.properties;
-            var fn = _.find(properties, function (property) {
-              return property.key.name === '$get';
-            });
-
-            if (fn) {
-              if (fn.value.type === 'FunctionExpression') {
-
-                deps = extractDeps(fn.value.params);
-                return true;
-
-              } else if (fn.value.type === 'Identifier') {
-
-                var varName = fn.value.name;
-                var blockScope = findScope(depsArg);
-
-                deps = extractVariableDeps(varName, blockScope);
-
-                return true;
-              }
-            }
-
-          } else if (bodyExpression.argument.type === 'Identifier') {
-
-            var varName = bodyExpression.argument.name;
-            var blockScope = findScope(depsArg);
-
-            var varNode = findVariable(varName, blockScope);
-            if (varNode) {
-
-              if (varNode.init.type === 'ObjectExpression') {
-                var properties = varNode.init.properties;
-                var fn = _.find(properties, function (property) {
-                  return property.key.name === '$get';
-                });
-
-                if (fn && fn.value.type === 'FunctionExpression') {
-                  deps = extractDeps(fn.value.params);
-                  return true;
-                }
-
-              }
-
-            }
-
-          }
-
-        }
-
-      });
-
-      return deps;
-    }
-
+    // provider has a lot more complex structure because of $get construct
+    // it may vary a lot, covering common cases
+    return findProviderDeps(depsArg);
   }
 
   return deps;
 }
 
 
-function extractDeps(params) {
+function findProviderDeps(depsFn) {
+  // function must have it's body
+  var depsFnBody = _.get(depsFn, 'body', {});
+  if (depsFnBody.type !== 'BlockStatement') {
+    return [];
+  }
+
+  // find a scope of provider body
+  var depsFnScope = findScope(depsFn);
+
   var deps = [];
 
-  params.forEach(function (param) {
+  // iterate over all body expressions in provider
+  var depsFnBodyExpressions = _.get(depsFnBody, 'body');
+  _.some(depsFnBodyExpressions, function (bodyExpression) {
+
+    var type = _.get(bodyExpression, 'type');
+
+    var expression = _.get(bodyExpression, 'expression', {});
+    var leftProp = _.get(expression, 'left.property', {});
+    var right = _.get(expression, 'right', {});
+
+    // covers "this.$get = ..."
+    if (type === 'ExpressionStatement' && leftProp.name === '$get') {
+
+      // covers "this.$get = function (...) { ... };"
+      if (right.type === 'FunctionExpression') {
+        deps = extractDeps(right.params);
+        return true; // exit loop
+      }
+
+      // covert "this.$get = someVar;"
+      if (right.type === 'Identifier') {
+        deps = extractVariableDeps(right.name, depsFnScope);
+        return true; // exit loop
+      }
+
+    }
+
+    var argument = _.get(bodyExpression, 'argument', {});
+
+    // covers "return ...;"
+    if (type === 'ReturnStatement') {
+
+      // covers "return { $get: function () {} };"
+      // covers "return { $get: someVar };"
+      if (argument.type === 'ObjectExpression') {
+        deps = extractObjectPropertyDeps(argument, '$get', depsFnScope);
+        return true;
+      }
+
+      // covers "return someVar;"
+      if (argument.type === 'Identifier') {
+
+        var varNode = findVariable(argument.name, depsFnScope);
+        if (varNode && _.get(varNode, 'init.type') === 'ObjectExpression') {
+          deps = extractObjectPropertyDeps(varNode.init, '$get', depsFnScope);
+          return true;
+        }
+
+      }
+
+    }
+
+  });
+
+  return deps;
+}
+
+
+function extractDeps(params) {
+  if (!_.isArray(params)) {
+    return [];
+  }
+
+  var deps = [];
+  _.forEach(params, function (param) {
     if (param.type === 'Identifier') {
 
       var dep = {
@@ -292,13 +280,11 @@ function extractDeps(params) {
       deps.push(dep);
     }
   });
-
   return deps;
 }
 
 
 function findVariable(varName, scope) {
-
   var variable;
   var currentScope = scope;
 
@@ -307,18 +293,17 @@ function findVariable(varName, scope) {
     currentScope = currentScope.upper;
   }
 
-  if (!variable) {
-    return void 0;
+  if (_.isUndefined(variable)) {
+    return variable;
   }
 
-  var node = _.first(variable.defs).node;
+  var node = _.get(variable, 'defs[0].node');
 
   return node;
 }
 
 
 function extractVariableDeps(varName, scope) {
-
   var varNode = findVariable(varName, scope);
   if (!varNode) {
     return [];
@@ -326,13 +311,46 @@ function extractVariableDeps(varName, scope) {
 
   var params = [];
 
-  if (varNode.type === 'FunctionDeclaration') {
-    params = varNode.params;
-  } else if (varNode.type === 'VariableDeclarator') {
-    params = varNode.init.params;
+  var varType = _.get(varNode, 'type');
+
+  // covers "function someVar() {}"
+  if (varType === 'FunctionDeclaration') {
+    params = _.get(varNode, 'params', []);
+  }
+
+  // covers "var someVar = ...";
+  if (varType === 'VariableDeclarator') {
+    params = _.get(varNode, 'init.params', []);
   }
 
   var deps = extractDeps(params);
+
+  return deps;
+}
+
+function extractObjectPropertyDeps(object, propName, scope) {
+
+  var prop = _.find(object.properties, function (property) {
+    return _.get(property, 'key.name') === propName;
+  });
+
+  if (!prop) {
+    return [];
+  }
+
+  var value = _.get(prop, 'value', {});
+
+  var deps = [];
+
+  // covers "{ key: function () {} }"
+  if (value.type === 'FunctionExpression') {
+    deps = extractDeps(value.params);
+  }
+
+  // covers "{ key: someVar }"
+  if (value.type === 'Identifier') {
+    deps = extractVariableDeps(value.name, scope);
+  }
 
   return deps;
 }

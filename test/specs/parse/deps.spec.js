@@ -159,4 +159,25 @@ describe('parse/deps', function () {
     }]);
   });
 
+  it('should extract provider deps from return variable', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".provider('testProvider', function () {" +
+    " var foo = function ($rootScope) {};" +
+    " var service = {" +
+    "   $get: foo" +
+    " };" +
+    " return service;" +
+    "});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'provider',
+      name: 'testProvider',
+      module: { name: 'test' },
+      deps: [{ name: '$rootScope' }]
+    }]);
+  });
+
 });
