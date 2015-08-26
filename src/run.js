@@ -31,7 +31,14 @@ run.init = function (initPathArg) {
                'Use another path.');
   }
 
-  fs.copySync(defaultsPath, initPath);
+  try {
+    fs.copySync(defaultsPath, initPath);
+  } catch (err) {
+    if (err.code === 'EACCES') {
+      return log('Not enough permissions to create directory at this location.');
+    }
+  }
+
   cache.set('useConfig', configPath);
   run.current();
 };
@@ -41,7 +48,7 @@ run.use = function (usePathArg) {
   var usePath = path.resolve(usePathArg);
 
   if (!fs.existsSync(usePath)) {
-    return log('Config file not found');
+    return log('Configuration file not found');
   }
 
   cache.set('useConfig', usePath);
@@ -138,5 +145,11 @@ function generate(unit, outputPath) {
 
   var output = render(source, data);
 
-  fs.writeFileSync(outputPath, output);
+  try {
+    fs.writeFileSync(outputPath, output);
+  } catch (err) {
+    if (err.code === 'EACCES') {
+      return log('Not enough permissions to create test file at this location.');
+    }
+  }
 }
