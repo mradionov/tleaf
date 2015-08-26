@@ -25,7 +25,7 @@ module.exports = {
 
     // Exclude particular providers, there won't be any test code generated
     // for them.
-    filter: ['$scope'],
+    filter: ['$scope', '$rootScope'],
 
     // TODO: map to template path?
     // Map provider type to a respective template. Can be helpful in case
