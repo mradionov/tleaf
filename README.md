@@ -5,6 +5,12 @@ tleaf
 
 Command line [npm](https://www.npmjs.com/) utility tool built on [Node.js](https://nodejs.org/) to generate [AngularJS](https://angularjs.org/) unit tests based on existing code or create them from scratch.
 
+## How does it work?
+
+It takes your AngularJS source file and parses it with the help of [esprima](http://esprima.org/) - standard-compliant ECMAScript parser, which results into a code syntax tree. Then it analyzes the tree, looks for AngularJS units and extracts infromation about them. It may ask you some questions to get more information. Everything results to a test file, generated based on pre-defined templates, containing the collected information.
+
+*Note: source code can be very different and complex from project to project (and from person to person), so it's really difficult to cover all cases and styles of writing AngularJS applications to be able to extract required information. If your AngularJs source code is not getting parsed as expected, feel free to create an issue with an example of the source code causing the problem.*
+
 ## Installation
 
 Install module globally:
@@ -22,7 +28,7 @@ tleaf [/path/to/source.js] [/path/to/output.spec.js]
 * `[/path/to/source.js]` - path to AngularJS source code with a unit to test
 * `[/path/to/output.spec.js]` - path to output test file
 
-The command parses your source file and extracts all AngularJS units (*controllers*, *services*, etc.). After that you will be asked which one you'd want to test and what are the types of unit's dependencies. The result will be a test file based on template for this unit type.
+The command parses your source file and extracts all AngularJS units. After that you will be asked which one you'd want to test. The result will be a test file based on template for this unit type.
 
 ***
 
