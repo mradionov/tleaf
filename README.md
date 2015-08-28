@@ -5,9 +5,22 @@ tleaf
 
 Command line [npm](https://www.npmjs.com/) utility tool built on [Node.js](https://nodejs.org/) to generate [AngularJS](https://angularjs.org/) unit tests based on existing code or create them from scratch.
 
+#### Contents:
+
+  * [How does it work?](#how-does-it-work)
+  * [Installation](#installation)
+  * [Usage](#usage)
+  * [Configuration](#configuration)
+    * [Configuration file](#configuration-file)
+    * [Custom templates](#custom-templates)
+      * [Data available in templates](#data-available-in-templates)
+      * [Template examples](#template-examples)
+      * [Extra template helpers](#extra-template-helpers)
+  * [Dependencies](#dependencies)
+
 ## How does it work?
 
-It takes your AngularJS source file and parses it with the help of [esprima](http://esprima.org/) - standard-compliant ECMAScript parser, which results into a code syntax tree. Then it analyzes the tree, looks for AngularJS units and extracts infromation about them. It may ask you some questions to get more information. Everything results to a test file, generated based on pre-defined templates, containing the collected information.
+It takes your AngularJS source file and parses it with the help of [esprima](http://esprima.org/) - standard-compliant ECMAScript parser, which results into a code syntax tree. Then it analyzes the tree, looks for AngularJS units and extracts infromation about them. It may ask you some questions to get some more information. Then it generates a test file, based on pre-defined templates, setting up the collected information.
 
 *Note: source code can be very different and complex from project to project (and from person to person), so it's really difficult to cover all cases and styles of writing AngularJS applications to be able to extract required information. If your AngularJs source code is not getting parsed as expected, feel free to create an issue with an example of the source code causing the problem.*
 
@@ -16,13 +29,15 @@ It takes your AngularJS source file and parses it with the help of [esprima](htt
 Install module globally:
 
 ```bash
-npm i tleaf -g
+$ npm i tleaf -g
 ```
 
 ## Usage
 
+***
+
 ```bash
-tleaf [/path/to/source.js] [/path/to/output.spec.js]
+$ tleaf [/path/to/source.js] [/path/to/output.spec.js]
 ```
 
 * `[/path/to/source.js]` - path to AngularJS source code with a unit to test
@@ -33,7 +48,7 @@ The command parses your source file and extracts all AngularJS units. After that
 ***
 
 ```bash
-tleaf create [/path/to/output.spec.js]
+$ tleaf create [/path/to/output.spec.js]
 ```
 
 * `[/path/to/output.spec.js]` - path to output test file
@@ -43,7 +58,7 @@ The command creates a test file based on answers you provide for a number of que
 ***
 
 ```bash
-tleaf init [/path/to/folder]
+$ tleaf init [/path/to/folder]
 ```
 
 * `[/path/to/folder]` - path to output folder
@@ -53,7 +68,7 @@ The command copies default templates to a directory you've provided. You'll be a
 ***
 
 ```bash
-tleaf use [/path/to/config.js]
+$ tleaf use [/path/to/config.js]
 ```
 
 * `[/path/to/config.js]` - path to configuration file
@@ -63,7 +78,7 @@ The command sets current configuration which will be used to generate test files
 ***
 
 ```bash
-tleaf use default
+$ tleaf use default
 ```
 
   The command allows to switch back to default templates.
@@ -71,7 +86,7 @@ tleaf use default
 ***
 
 ```bash
-tleaf current
+$ tleaf current
 ```
 
   The command shows which configuration is used at the moment.
@@ -80,7 +95,7 @@ tleaf current
 
 When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
 
-#### Configuration file
+### Configuration file
 
 By default configuration file `config.js` is empty, the default configuration is used ([see default configuration file](src/config/default.js)). Available options:
 
@@ -105,6 +120,8 @@ By default configuration file `config.js` is empty, the default configuration is
     }
   };
   ```
+
+*NOTE: providers are the dependencies of your unit.*
 
 * `providers.process: [array]` - array of provider types which should be parsed and processed. To reorder the appearance of provider types change their order in this array.
 
@@ -144,16 +161,17 @@ By default configuration file `config.js` is empty, the default configuration is
   };
   ```
 
-#### Templates
+### Custom templates
 
-Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to fill it with the gathered data. Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are completed by taking already existing ones as an example.
+Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to fill it with the gathered data. Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are completed by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates).
 Templates are processed by the templating engine called [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
 
-###### Available data
+#### Data available in templates
 
-Information, which is being collected by a parser or from your answers, gets passed to templates. Structure of the data available in templates (taking some controller as an example):
+Information, which is being collected by a parser or from your answers, gets passed to templates. Here is the structure of the data available in templates, consider it a global object in your templates (taking some controller as an example):
 
 ```js
+
 {
   // top level
 
@@ -229,9 +247,9 @@ Information, which is being collected by a parser or from your answers, gets pas
 }
 ```
 
-Consider it a global object in your templates.
+#### Template examples
 
-###### Template examples
+Here you can find some examples of composing the templates. You can discover more use-cases by looking at [default templates](src/defaults/templates).
 
 1. Load module:
 
@@ -288,9 +306,9 @@ Consider it a global object in your templates.
   });
   ```
 
-You can discover more use-cases by looking at [default templates](src/defaults/templates).
+#### Extra template helpers
 
-###### Additional template helpers
+Handlerbars allows to create custom helpers to help render the data, here are some of them built-in in the module, which might be helpful:
 
 * `{{only array}}` - joins array of strings with `", "`:
 
@@ -311,3 +329,13 @@ You can discover more use-cases by looking at [default templates](src/defaults/t
   ```
 
 * `{{defaults value defaultValue}}` - renders *value* if it is not *undefined*, *defaultValue* otherwise.
+
+## Test
+
+```bash
+$ npm install
+$ npm test
+```
+
+## License
+MIT © [Michael Radionov](https://github.com/mradionov)
