@@ -1,12 +1,12 @@
 'use strict';
 
-var esprima = require('esprima'),
-    estraverse = require('estraverse'),
-    escope = require('escope'),
-    _ = require('lodash');
+var esprima = require('esprima');
+var estraverse = require('estraverse');
+var escope = require('escope');
+var _ = require('lodash');
 
-var config = require('./config'),
-    log = require('./log');
+var config = require('./config');
+var UserError = require('./error/UserError');
 
 ////////
 
@@ -24,9 +24,7 @@ function parse(source) {
   try {
     ast = esprima.parse(source);
   } catch (err) {
-    log('Source file is not valid');
-    log.pure('Error: %s', err.message);
-    throw err;
+    throw new UserError('Source file is not valid', err);
   }
 
   var scopeManager = escope.analyze(ast);

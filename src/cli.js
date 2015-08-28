@@ -1,10 +1,34 @@
 'use strict';
 
 var _ = require('lodash');
-var run = require('./run'),
-    log = require('./log');
+var run = require('./run');
+var UserError = require('./error/UserError');
 
 ////////
+
+// log prefixed
+function preflog() {
+  var prefix = '[tleaf]: ';
+  var args = _.toArray(arguments);
+  var first = prefix + args.shift();
+  console.log.apply(console, [first].concat(args));
+}
+
+// handler for all unhandled errors
+// might be a UserError, format it accordingly
+
+process.on('uncaughtException', function (err) {
+  if (err instanceof UserError) {
+    preflog(err.userMessage);
+  } else {
+    console.log(err.message);
+  }
+  if (err.stack) {
+    console.log(err.stack);
+  }
+});
+
+// read user input
 
 var args = process.argv.slice(2);
 var command = args[0];
@@ -45,13 +69,12 @@ default:
 
 }
 
-
 ////////
 
 
 function validate(expression, message, command) {
   if (expression) { return; }
-  log(message);
+  preflog(message);
   if (command) {
     help(command);
   }
@@ -118,5 +141,5 @@ function help(one) {
     }
   });
 
-  log.pure(output);
+  console.log(output);
 }

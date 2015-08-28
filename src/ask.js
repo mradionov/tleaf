@@ -1,7 +1,7 @@
 'use strict';
 
-var inquirer = require('inquirer'),
-    _ = require('lodash');
+var inquirer = require('inquirer');
+var _ = require('lodash');
 
 var config = require('./config');
 

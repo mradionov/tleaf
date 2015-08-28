@@ -1,10 +1,10 @@
 'use strict';
 
-var fs = require('fs'),
-    path = require('path');
+var fs = require('fs');
+var path = require('path');
 
-var cache = require('./cache'),
-    config = require('./config');
+var cache = require('./cache');
+var config = require('./config');
 
 ////////
 

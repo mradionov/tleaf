@@ -1,9 +1,11 @@
 'use strict';
 
-var fs = require('fs-extra'),
-    path = require('path');
-
+var fs = require('fs-extra');
+var path = require('path');
+var os = require('os');
 var _ = require('lodash');
+var basedir = require('xdg-basedir');
+var UserError = require('./error/UserError');
 
 ////////
 
@@ -49,17 +51,11 @@ cache.remove = function (path) {
   save(data);
 };
 
-// TODO: check on windows
 cache.path = function () {
-  var homePath = process.env.HOME;
-  if (process.platform === 'win32') {
-    homePath = process.env.USERPROFILE;
-  }
-
-  var cacheDirName = '.tleaf';
+  var basePath = basedir.cache || os.tempdir();
+  var cacheDir = '.tleaf';
   var cacheFileName = 'cache.json';
-  var cachePath = path.join(homePath, cacheDirName, cacheFileName);
-
+  var cachePath = path.join(basePath, cacheDir, cacheFileName);
   return cachePath;
 };
 
@@ -101,6 +97,12 @@ function save(data) {
   var cachePath = cache.path();
   var cacheDir = path.dirname(cachePath);
 
-  fs.mkdirsSync(cacheDir);
-  fs.writeFileSync(cachePath, serialized, 'utf8');
+  try {
+    fs.mkdirsSync(cacheDir);
+    fs.writeFileSync(cachePath, serialized, 'utf8');
+  } catch (err) {
+    if (err.code === 'EACCES') {
+      throw new UserError('Not enough permissions to write cache.', err);
+    }
+  }
 }

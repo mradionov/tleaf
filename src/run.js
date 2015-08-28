@@ -1,18 +1,18 @@
 'use strict';
 
-var fs = require('fs-extra'),
-    path = require('path'),
-    _ = require('../lib/lodash.mixin');
+var fs = require('fs-extra');
+var path = require('path');
+var _ = require('../lib/lodash.mixin');
 
-var config = require('./config'),
-    parse = require('./parse'),
-    ask = require('./ask'),
-    filter = require('./filter'),
-    cache = require('./cache'),
-    serialize = require('./serialize'),
-    render = require('./render'),
-    template = require('./template'),
-    log = require('./log');
+var config = require('./config');
+var parse = require('./parse');
+var ask = require('./ask');
+var filter = require('./filter');
+var cache = require('./cache');
+var serialize = require('./serialize');
+var render = require('./render');
+var template = require('./template');
+var UserError = require('./error/UserError');
 
 ////////
 
@@ -27,19 +27,21 @@ run.init = function (initPathArg) {
   var defaultsPath = path.join(__dirname, 'defaults');
 
   if (fs.existsSync(initPath)) {
-    return log('Directory (or file) already exists at this location. ' +
+    throw new UserError('Directory (or file) already exists at this location. ' +
                'Use another path.');
   }
+
+  cache.set('useConfig', configPath);
 
   try {
     fs.copySync(defaultsPath, initPath);
   } catch (err) {
     if (err.code === 'EACCES') {
-      return log('Not enough permissions to create directory at this location.');
+      throw new UserError('Not enough permissions to create directory.', err);
     }
+    cache.remove('useConfig');
   }
 
-  cache.set('useConfig', configPath);
   run.current();
 };
 
@@ -48,7 +50,7 @@ run.use = function (usePathArg) {
   var usePath = path.resolve(usePathArg);
 
   if (!fs.existsSync(usePath)) {
-    return log('Configuration file not found');
+    throw new UserError('Configuration file not found');
   }
 
   cache.set('useConfig', usePath);
