@@ -11,12 +11,10 @@ Command line [npm](https://www.npmjs.com/) utility tool built on [Node.js](https
   * [Installation](#installation)
   * [Usage](#usage)
   * [Configuration](#configuration)
-    * [Configuration file](#configuration-file)
-    * [Custom templates](#custom-templates)
-      * [Data available in templates](#data-available-in-templates)
-      * [Template examples](#template-examples)
-      * [Extra template helpers](#extra-template-helpers)
-  * [Dependencies](#dependencies)
+  * [Custom templates](#custom-templates)
+    * [Data available in templates](#data-available-in-templates)
+    * [Template examples](#template-examples)
+    * [Extra template helpers](#extra-template-helpers)
 
 ## How does it work?
 
@@ -94,9 +92,6 @@ $ tleaf current
 ## Configuration
 
 When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
-
-### Configuration file
-
 By default configuration file `config.js` is empty, the default configuration is used ([see default configuration file](src/config/default.js)). Available options:
 
 * `indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces to replace one tab.
@@ -161,12 +156,14 @@ By default configuration file `config.js` is empty, the default configuration is
   };
   ```
 
-### Custom templates
+## Custom templates
 
-Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to fill it with the gathered data. Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are completed by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates).
+Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to fill it with the gathered data.
+When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
+Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are completed by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates).
 Templates are processed by the templating engine called [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
 
-#### Data available in templates
+### Data available in templates
 
 Information, which is being collected by a parser or from your answers, gets passed to templates. Here is the structure of the data available in templates, consider it a global object in your templates (taking some controller as an example):
 
@@ -247,7 +244,7 @@ Information, which is being collected by a parser or from your answers, gets pas
 }
 ```
 
-#### Template examples
+### Template examples
 
 Here you can find some examples of composing the templates. You can discover more use-cases by looking at [default templates](src/defaults/templates).
 
@@ -306,7 +303,7 @@ Here you can find some examples of composing the templates. You can discover mor
   });
   ```
 
-#### Extra template helpers
+### Extra template helpers
 
 Handlerbars allows to create custom helpers to help render the data, here are some of them built-in in the module, which might be helpful:
 
