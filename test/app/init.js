@@ -1,7 +1,8 @@
 'use strict';
 
-var _ = require('lodash');
+var fs = require('fs-extra');
 var path = require('path');
+var _ = require('lodash');
 var proxyquire = require('proxyquire').noCallThru();
 
 var askStub = {};
@@ -15,11 +16,10 @@ var outputBasePath = path.join('test', 'app', 'output');
 
 ////////
 
-
 generate('controller', 'MyCtrl', { '$http': 'provider', 'MyService': 'service' });
 generate('service', 'MyService', { '$http': 'provider', 'MyService': 'service' });
 generate('factory', 'MyFactory', { '$http': 'provider', 'MyService': 'service' });
-generate('directive', 'MyDir', { '$http': 'provider', 'MyService': 'service' });
+generate('directive', 'myDir', { '$http': 'provider', 'MyService': 'service' });
 generate('provider', 'MyProvider', { '$http': 'provider', 'MyService': 'service' });
 generate('filter', 'MyFilter');
 generate('value', 'MyValue');
@@ -54,4 +54,15 @@ function generate(type, name, deps) {
   var outputPath = path.join(outputBasePath, type + '.spec.js');
 
   run.parse(sourcePath, outputPath);
+
+  var targetString = '// Specs here';
+  var replaceString =
+    'it("should work", function () {' +
+    ' expect(true).to.be.ok; ' +
+    '});';
+
+  var output = fs.readFileSync(outputPath, 'utf8');
+  var outputWithSpec = output.replace(targetString, replaceString);
+
+  fs.writeFileSync(outputPath, outputWithSpec, 'utf8');
 }

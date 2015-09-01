@@ -36,7 +36,7 @@ describe('Service: {{name}}', function () {
 
 	beforeEach(function () {
 		// Load the service's module
-		module('{{module}}')
+		module('{{module}}');
 	});
 
 	// make sure no expectations were missed in your tests.
@@ -44,6 +44,13 @@ describe('Service: {{name}}', function () {
 	afterEach(function () {
 		httpBackend.verifyNoOutstandingExpectation();
 		httpBackend.verifyNoOutstandingRequest();
+	});
+
+	// Specs here
+
+	beforeEach(function () {
+		// Inject with expected values
+		_setup();
 	});
 
 });

@@ -45,4 +45,6 @@ describe('Directive: {{name}}', function () {
 		});
 	});
 
+	// Specs here
+
 });

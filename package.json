@@ -33,8 +33,9 @@
     "proxyquire": "^1.6.0"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha 'test/specs/**/*.spec.js'",
-    "test:app": "./node_modules/karma/bin/karma start test/support/karma.conf.js",
+    "test": "npm run test:unit && npm run test:app",
+    "test:unit": "./node_modules/mocha/bin/mocha 'test/specs/**/*.spec.js'",
+    "test:app": "node test/app/init.js && ./node_modules/karma/bin/karma start test/support/karma.conf.js && node test/app/teardown.js",
     "test:debug": "./node_modules/node-inspector/bin/node-debug.js _mocha 'test/specs/**/*.spec.js'"
   }
 }

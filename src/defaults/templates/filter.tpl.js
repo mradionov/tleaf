@@ -23,4 +23,6 @@ describe('Filter: {{name}}', function () {
 		});
 	});
 
+	// Specs here
+
 });

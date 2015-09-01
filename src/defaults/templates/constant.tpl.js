@@ -13,4 +13,6 @@ describe('Constant: {{name}}', function () {
 		});
 	});
 
+	// Specs here
+
 });

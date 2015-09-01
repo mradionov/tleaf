@@ -29,4 +29,7 @@ describe('Controller: {{name}}', function () {
 		});
 
 	});
+
+	// Specs here
+
 });

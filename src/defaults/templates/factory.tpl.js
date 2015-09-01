@@ -23,4 +23,6 @@ describe('Factory: {{name}}', function () {
 		});
 	});
 
+	// Specs here
+
 });
