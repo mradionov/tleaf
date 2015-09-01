@@ -131,13 +131,13 @@ By default configuration file `config.js` is empty, the default configuration is
   };
   ```
 
-* `providers.filter: [array]` - array of provider names, which should be ignored, by default only `$scope` and `$rootScope` are filtered out.
+* `providers.filter: [array]` - array of provider names, which should be ignored, by default only `$scope` is filtered out.
 
   ```js
   module.exports = {
     providers: {
       // ignore dependencies with these names
-      filter: ['$scope', '$rootScope', 'GlobalService', 'SECRET_CONST']
+      filter: ['$scope', 'GlobalService', 'SECRET_CONST']
     }
   };
   ```
