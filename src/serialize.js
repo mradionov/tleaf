@@ -28,7 +28,7 @@ function serialize(unit) {
 
     dep._name_ = wrap(dep.name);
 
-    dep.provider = function () {
+    dep.partial = function () {
       return this.type;
     };
 

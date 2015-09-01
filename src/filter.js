@@ -19,7 +19,7 @@ function filter(all) {
   };
 
   var filtered = _.filter(all, function (dep) {
-    return !_.contains(config.providers.filter, dep.name);
+    return !_.contains(config.dependencies.filter, dep.name);
   });
 
   deps.unknown = filtered;

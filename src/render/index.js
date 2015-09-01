@@ -1,10 +1,10 @@
 'use strict';
 
-var Handlebars = require('handlebars'),
-    _ = require('lodash');
+var Handlebars = require('handlebars');
+var _ = require('lodash');
 
-var config = require('../config'),
-    template = require('../template');
+var config = require('../config');
+var template = require('../template');
 
 var helpers = require('./helpers');
 
@@ -49,7 +49,7 @@ function registerHelpers() {
 
 
 function registerPartials() {
-  _.forEach(config.providers.process, function (name) {
+  _.forEach(config.dependencies.process, function (name) {
     var source = template.provider(name);
     Handlebars.registerPartial(name, source);
   });

@@ -37,7 +37,7 @@ describe('serialize', function () {
   it('should create shortcut for deps with names wrapped in _', function () {
     // remove property because can't test it with chai
     // it can't compare functions and does not support jasmine.any
-    var removeProp = ['provider'];
+    var removeProp = ['partial'];
     var deps = data.deps.forEach(function (dep) {
       removeProp.forEach(function (prop) {
         delete dep[prop];
@@ -59,8 +59,8 @@ describe('serialize', function () {
   });
 
   it('should create a helper function to extract dep type', function () {
-    assert.equal(data.deps[0].provider(), 'provider');
-    assert.equal(data.deps[1].provider(), 'factory');
+    assert.equal(data.deps[0].partial(), 'provider');
+    assert.equal(data.deps[1].partial(), 'factory');
   });
 
   it('should create args for deps names', function () {

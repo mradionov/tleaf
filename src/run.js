@@ -128,7 +128,7 @@ function identify(unit, callback) {
   }
 
   // sort before asking
-  var unknown = _.sortByKeys(deps.unknown, config.providers.process, 'type');
+  var unknown = _.sortByKeys(deps.unknown, config.dependencies.process, 'type');
 
   ask.identifyDeps(unknown, function (identified) {
     unit.deps = deps.known.concat(identified);
@@ -139,7 +139,7 @@ function identify(unit, callback) {
 
 function generate(unit, outputPath) {
 
-  unit.deps = _.sortByKeys(unit.deps, config.providers.process, 'type');
+  unit.deps = _.sortByKeys(unit.deps, config.dependencies.process, 'type');
 
   var source = template.unit(unit.type);
 

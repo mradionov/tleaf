@@ -21,8 +21,8 @@ template.unit = function (type) {
 
 
 template.provider = function (type) {
-  var mappedType = config.providers.templateMap[type] || type;
-  return load(mappedType, path.join('templates', 'providers'));
+  var mappedType = config.dependencies.templateMap[type] || type;
+  return load(mappedType, path.join('templates', 'dependencies'));
 };
 
 ////////

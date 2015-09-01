@@ -19,6 +19,6 @@ if (useConfigPath && fs.existsSync(useConfigPath)) {
 // deep merge configs
 var resolvedConfig = _.merge({}, defaultConfig, useConfig);
 
-// TODO: check if units.process and providers.process are empty
+// TODO: check if units.process and dependencies.process are empty
 
 module.exports = resolvedConfig;

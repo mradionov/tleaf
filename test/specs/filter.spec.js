@@ -24,7 +24,7 @@ describe('filter', function () {
   });
 
   it('should move all deps to unknown', function () {
-    configStub.providers.filter = [];
+    configStub.dependencies.filter = [];
     var result = filter(unit.deps);
     assert.deepEqual(result, {
       known: [],
@@ -37,7 +37,7 @@ describe('filter', function () {
   });
 
   it('should exclude deps if set', function () {
-    configStub.providers.filter = ['$scope', 'MyDir'];
+    configStub.dependencies.filter = ['$scope', 'MyDir'];
     var result = filter(unit.deps);
     assert.deepEqual(result, {
       known: [],

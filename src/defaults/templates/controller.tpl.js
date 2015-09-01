@@ -10,7 +10,7 @@ describe('Controller: {{name}}', function () {
 
 		module(function ($provide) {
 			{{#each deps}}
-			{{> (this.provider) this}}
+			{{> (this.partial) this}}
 			{{/each}}
 		});
 

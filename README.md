@@ -104,6 +104,7 @@ By default configuration file `config.js` is empty, the default configuration is
     indent: '--'    // 1 tab = '--'
   };
   ```
+
 * `units.process: [array]` - array of unit types which should be parsed and processed. To reorder the appearance of unit types change their order in this array.
 
   ```js
@@ -116,13 +117,11 @@ By default configuration file `config.js` is empty, the default configuration is
   };
   ```
 
-*NOTE: providers are the dependencies of your unit.*
-
-* `providers.process: [array]` - array of provider types which should be parsed and processed. To reorder the appearance of provider types change their order in this array.
+* `dependencies.process: [array]` - array of provider types which should be parsed and processed. To reorder the appearance of provider types change their order in this array.
 
   ```js
   module.exports = {
-    providers: {
+    dependencies: {
       // process only services and values, others will be ignored
       // these types will appear in the exact same order, which means that
       // all services will be rendered first, then all the values, etc.
@@ -131,22 +130,22 @@ By default configuration file `config.js` is empty, the default configuration is
   };
   ```
 
-* `providers.filter: [array]` - array of provider names, which should be ignored, by default only `$scope` is filtered out.
+* `dependencies.filter: [array]` - array of provider names, which should be ignored, by default only `$scope` is filtered out.
 
   ```js
   module.exports = {
-    providers: {
+    dependencies: {
       // ignore dependencies with these names
       filter: ['$scope', 'GlobalService', 'SECRET_CONST']
     }
   };
   ```
 
-* `providers.templateMap: [object]` - object, which maps provider types with templates they should use. May be useful, when you want to render *factories* or *services* using *value* template.
+* `dependencies.templateMap: [object]` - object, which maps provider types with templates they should use. May be useful, when you want to render *factories* or *services* using *value* template.
 
   ```js
   module.exports = {
-    providers: {
+    dependencies: {
       templateMap: {
         'provider': 'provider', // use default provider template
         'service': 'value',     // use value template for service

@@ -14,8 +14,8 @@ describe('defaults/templates', function () {
     var paths = [
       'constant', 'controller', 'directive', 'factory',
       'filter', 'provider', 'service', 'value',
-      'providers/constant', 'providers/factory', 'providers/provider',
-      'providers/service', 'providers/value'
+      'dependencies/constant', 'dependencies/factory', 'dependencies/provider',
+      'dependencies/service', 'dependencies/value'
     ];
 
     paths.forEach(function (path) {

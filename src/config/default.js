@@ -16,19 +16,19 @@ module.exports = {
 
   },
 
-  providers: {
+  dependencies: {
 
-    // List the providers which should be processed. Only the types mentioned
+    // List the dependencies which should be processed. Only the types mentioned
     // here will be asked about and be included in generated test code.
     // The order they appear can be changed by reodering these keys
     process: ['provider', 'service', 'factory', 'value', 'constant'],
 
-    // Exclude particular providers, there won't be any test code generated
+    // Exclude particular dependencies, there won't be any test code generated
     // for them.
     filter: ['$scope'],
 
     // TODO: map to template path?
-    // Map provider type to a respective template. Can be helpful in case
+    // Map dependency type to a respective template. Can be helpful in case
     // when one wants to mock services and factories with values.
     templateMap: {
       'provider': 'provider',
