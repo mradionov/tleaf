@@ -1,10 +1,11 @@
 'use strict';
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 
 var cache = require('./cache');
 var config = require('./config');
+var UserError = require('./error/UserError');
 
 ////////
 
@@ -20,7 +21,7 @@ template.unit = function (type) {
 };
 
 
-template.provider = function (type) {
+template.dependency = function (type) {
   var mappedType = config.dependencies.templateMap[type] || type;
   return load(mappedType, path.join('templates', 'dependencies'));
 };
@@ -44,5 +45,18 @@ function load(type, relativePath) {
     }
   }
 
-  return fs.readFileSync(templatePath, 'utf8');
+  var templateSource = '';
+
+  try {
+    templateSource = fs.readFileSync(templatePath, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      throw new UserError('Template file not found');
+    }
+    if (err.code === 'EACCES') {
+      throw new UserError('Not enough permissions to access template file');
+    }
+  }
+
+  return templateSource;
 }

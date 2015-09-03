@@ -2,7 +2,7 @@
 
 var fs = require('fs-extra');
 var path = require('path');
-var _ = require('../lib/lodash.mixin');
+var _ = require('./lib/lodash.mixin');
 
 var config = require('./config');
 var parse = require('./parse');
@@ -28,7 +28,7 @@ run.init = function (initPathArg) {
 
   if (fs.existsSync(initPath)) {
     throw new UserError('Directory (or file) already exists at this location. ' +
-               'Use another path.');
+                        'Use another path.');
   }
 
   cache.set('useConfig', configPath);

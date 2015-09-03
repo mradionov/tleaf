@@ -50,7 +50,7 @@ function registerHelpers() {
 
 function registerPartials() {
   _.forEach(config.dependencies.process, function (name) {
-    var source = template.provider(name);
+    var source = template.dependency(name);
     Handlebars.registerPartial(name, source);
   });
 }

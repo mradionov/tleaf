@@ -5,7 +5,7 @@ var proxyquire = require('proxyquire');
 
 var stub = { config: {} };
 
-var render = proxyquire('../../../src/render', {
+var render = proxyquire('./../../../src/render', {
   '../config': stub.config
 });
 

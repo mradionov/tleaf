@@ -2,7 +2,7 @@
 
 var assert = require('chai').assert;
 
-var _ = require('../../lib/lodash.mixin');
+var _ = require('./../../../src/lib/lodash.mixin');
 
 describe('lodash.mixin', function () {
 

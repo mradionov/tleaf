@@ -1,6 +1,6 @@
 'use strict';
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var _ = require('lodash');
 
 var cache = require('../cache');
