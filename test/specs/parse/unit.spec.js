@@ -208,4 +208,34 @@ describe('parse/unit', function () {
     }]);
   });
 
+  it('should not include unit with unparsable name', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".controller(unknownVar, function () {});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, []);
+  });
+
+  it('should not include unit with unparsable module name', function () {
+    var source =
+    "angular.module(unknownVar, [])" +
+    ".controller('TestController', function () {});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, []);
+  });
+
+  it('should not include unit with unparsable type', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".unknown('TestController', function () {});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, []);
+  });
+
 });

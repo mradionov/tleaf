@@ -16,10 +16,6 @@ module.exports = parse;
 
 
 function parse(source) {
-
-  // TODO: can throw exceptions because of bad code
-  // consider re-throwing it, do not use promises or callbacks, keep it sync
-
   var ast;
   try {
     ast = esprima.parse(source);
@@ -69,22 +65,25 @@ function parse(source) {
   var units = [];
 
   _.forEach(calls, function (call) {
+    // for now use only completely parsed units
+    // TODO: ask user for information when parsing in real-time
+    //       if unable to parse it automatically
+    var name = findName(call.node, call.scope);
+    if (_.isUndefined(name)) { return; }
+
+    var type = findType(call.node, call.scope);
+    if (_.isUndefined(type)) { return; }
 
     var module = findModule(call.node, call.scope);
-    // unit must have a module, otherwise it can be a simple function call
-    // which has the same name as some unit type
-    if (_.isUndefined(module.name)) {
-      return;
-    }
+    if (_.isUndefined(module.name)) { return; }
 
-    // deps depend on type, different unit types have deps defined differently
-    var type = findType(call.node, call.scope);
+    var deps = findDeps(call.node, call.scope, type);
 
     var unit = {
-      name: findName(call.node, call.scope),
+      name: name,
       type: type,
       module: module,
-      deps: findDeps(call.node, call.scope, type)
+      deps: deps
     };
 
     units.unshift(unit);
