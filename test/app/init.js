@@ -10,8 +10,8 @@ var run = proxyquire('../../src/run', {
   './ask': askStub
 });
 
-var sourcePath = path.join('test', 'app', 'source', 'app.js');
-var outputBasePath = path.join('test', 'app', 'output');
+var appSourcePath = path.join('test', 'app', 'source', 'app.js');
+var testBasePath = path.join('test', 'app', 'test');
 
 
 ////////
@@ -20,7 +20,7 @@ generate('controller', 'MyCtrl', { '$http': 'provider', 'MyService': 'service' }
 generate('service', 'MyService', { '$http': 'provider', 'MyService': 'service' });
 generate('factory', 'MyFactory', { '$http': 'provider', 'MyService': 'service' });
 generate('directive', 'myDir', { '$http': 'provider', 'MyService': 'service' });
-generate('provider', 'MyProvider', { '$http': 'provider', 'MyService': 'service' });
+generate('provider', 'MyProv', { '$http': 'provider', 'MyService': 'service' });
 generate('filter', 'MyFilter');
 generate('value', 'MyValue');
 generate('constant', 'MyConstant');
@@ -35,7 +35,7 @@ function generate(type, name, deps) {
       return unit.type === type && unit.name === name;
     });
     if (_.isUndefined(unit)) {
-      throw new Error('Unit to found');
+      throw new Error('Bad test: unit to found - ' + unit.name);
     }
     callback(unit);
   };
@@ -43,7 +43,7 @@ function generate(type, name, deps) {
   askStub.identifyDeps = function (unknown, callback) {
     var identified = _.map(unknown, function (dep) {
       if (_.isUndefined(deps[dep.name])) {
-        throw new Error('Dep not found');
+        throw new Error('Bad test: dep not found - ' + dep.name);
       }
       dep.type = deps[dep.name];
       return dep;
@@ -51,18 +51,30 @@ function generate(type, name, deps) {
     callback(identified);
   };
 
-  var outputPath = path.join(outputBasePath, type + '.spec.js');
+  //
 
-  run.parse(sourcePath, outputPath);
+  var testPath = path.join(testBasePath, type + '.spec.js');
 
-  var targetString = '// Specs here';
-  var replaceString =
-    'it("should work", function () {' +
+  // generate test file
+  run.parse(appSourcePath, testPath);
+
+  // load source of the generated test file
+  var testSource = fs.readFileSync(testPath, 'utf8');
+
+  // find end of the suite
+  var target = '});';
+  var index = testSource.lastIndexOf(target);
+  if (index < 0) {
+    throw new Error('Bad test: unable to find injection index');
+  }
+
+  var injection =
+    'it("should work for ' + type + '", function () {' +
     ' expect(true).to.be.ok; ' +
     '});';
 
-  var output = fs.readFileSync(outputPath, 'utf8');
-  var outputWithSpec = output.replace(targetString, replaceString);
+  var modifiedTestSource = testSource.substr(0, index) + injection +
+    testSource.substr(index, testSource.length);
 
-  fs.writeFileSync(outputPath, outputWithSpec, 'utf8');
+  fs.writeFileSync(testPath, modifiedTestSource, 'utf8');
 }
