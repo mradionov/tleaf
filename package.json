@@ -30,7 +30,8 @@
     "karma-phantomjs-launcher": "^0.2.1",
     "mocha": "^2.2.5",
     "phantomjs": "^1.9.18",
-    "proxyquire": "^1.6.0"
+    "proxyquire": "^1.6.0",
+    "sinon": "^1.16.1"
   },
   "scripts": {
     "test": "npm run test:unit && npm run test:app",

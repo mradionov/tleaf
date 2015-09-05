@@ -1,11 +1,11 @@
 'use strict';
 
 var assert = require('chai').assert;
-var sinon = require("sinon");
+var sinon = require('sinon');
 
-var configModule = require('./../../../src/config/default');
+var configModule = require('./../../../src/defaults/tleaf.conf');
 
-describe('config/default', function () {
+describe('defaults/tleaf.conf', function () {
 
   it('should be an exportable node module in form of a function', function () {
     assert.isFunction(configModule);

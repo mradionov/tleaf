@@ -9,15 +9,26 @@ var defaultConfig = require('./default');
 
 ////////
 
+var resolvedConfig = {};
+
+// create API for config module
+var config = {
+  set: function (options) {
+    _.merge(resolvedConfig, options);
+  }
+};
+
+// call config module function providing config API
+defaultConfig(config);
+
 var useConfig = {};
 var useConfigPath = cache.get('useConfig');
 if (useConfigPath && fs.existsSync(useConfigPath)) {
   // load custom config as module
   useConfig = require(useConfigPath);
+  // call user config module function providing config API
+  useConfig(config);
 }
-
-// deep merge configs
-var resolvedConfig = _.merge({}, defaultConfig, useConfig);
 
 // TODO: check if units.process and dependencies.process are empty
 
