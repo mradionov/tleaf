@@ -20,7 +20,7 @@ function parse(source) {
   try {
     ast = esprima.parse(source);
   } catch (err) {
-    throw new UserError('Source file is not valid', err);
+    throw new UserError('Source file is not valid.', err);
   }
 
   var scopeManager = escope.analyze(ast);

@@ -2,24 +2,17 @@
 
 var _ = require('lodash');
 var run = require('./run');
+var log = require('./log');
 var UserError = require('./error/UserError');
 
 ////////
-
-// log prefixed
-function preflog() {
-  var prefix = '[tleaf]: ';
-  var args = _.toArray(arguments);
-  var first = prefix + args.shift();
-  console.log.apply(console, [first].concat(args));
-}
 
 // handler for all unhandled errors
 // might be a UserError, format it accordingly
 
 process.on('uncaughtException', function (err) {
   if (err instanceof UserError) {
-    preflog(err.userMessage);
+    log.pref(err.userMessage);
   } else {
     console.log(err.message);
   }
@@ -36,17 +29,17 @@ var command = args[0];
 switch (command) {
 
 case 'create':
-  validate(args[1], 'Missing path to output file', 'create');
+  validate(args[1], 'Missing path to output file.', 'create');
   run.create(args[1]);
   break;
 
 case 'init':
-  validate(args[1], 'Missing path to output folder', 'init');
+  validate(args[1], 'Missing path to output folder.', 'init');
   run.init(args[1]);
   break;
 
 case 'use':
-  validate(args[1], 'Missing path to config file', 'use');
+  validate(args[1], 'Missing path to config file.', 'use');
   run.use(args[1]);
   break;
 
@@ -74,7 +67,7 @@ default:
 
 function validate(expression, message, command) {
   if (expression) { return; }
-  preflog(message);
+  log.pref(message);
   if (command) {
     help(command);
   }
@@ -122,7 +115,7 @@ function help(one) {
 
   if (!one) {
     output += '\n';
-    output += 'tleaf - AngularJS unit test generator';
+    output += 'tleaf - AngularJS unit test generator.';
     output += '\n';
   }
 
@@ -141,5 +134,5 @@ function help(one) {
     }
   });
 
-  console.log(output);
+  log.info(output);
 }

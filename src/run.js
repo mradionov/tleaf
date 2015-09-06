@@ -12,6 +12,7 @@ var cache = require('./cache');
 var serialize = require('./serialize');
 var render = require('./render');
 var template = require('./template');
+var log = require('./log');
 var UserError = require('./error/UserError');
 
 ////////
@@ -27,8 +28,9 @@ run.init = function (initPathArg) {
   var defaultsPath = path.join(__dirname, 'defaults');
 
   if (fs.existsSync(initPath)) {
-    throw new UserError('Directory (or file) already exists at this location. ' +
-                        'Use another path.');
+    throw new UserError(
+      'Directory (or file) already exists at this location. Use another path.'
+    );
   }
 
   cache.set('useConfig', configPath);
@@ -50,7 +52,7 @@ run.use = function (usePathArg) {
   var usePath = path.resolve(usePathArg);
 
   if (!fs.existsSync(usePath)) {
-    throw new UserError('Configuration file not found');
+    throw new UserError('Configuration file not found.');
   }
 
   cache.set('useConfig', usePath);
@@ -67,9 +69,9 @@ run.default = function () {
 run.current = function () {
   var usePath = cache.get('useConfig');
   if (!usePath) {
-    log('Using default config');
+    log.pref('Using default config.');
   } else {
-    log('Current config path: %s', usePath);
+    log.pref('Current config path: %s.', usePath);
   }
 };
 
@@ -92,7 +94,7 @@ run.parse = function (sourcePathArg, outputPathArg) {
     source = fs.readFileSync(sourcePath, 'utf8');
   } catch (err) {
     if (err.code === 'ENOENT') {
-      return log('Source file not found');
+      throw new UserError('Source file not found.');
     }
   }
 
@@ -103,12 +105,20 @@ run.parse = function (sourcePathArg, outputPathArg) {
   });
 
   if (!processedUnits.length) {
-    return log('Could not find any units');
+    throw new UserError('Could not find any units.');
   }
 
   units = _.sortByKeys(units, config.units.process, 'type');
 
   ask.pickUnit(units, function (pickedUnit) {
+
+    if (units.length === 1) {
+      log.pref(
+        'Generating test file for %s "%s" from module "%s" ...',
+        pickedUnit.type, pickedUnit.name, pickedUnit.module.name
+      );
+    }
+
     identify(pickedUnit, function (unit) {
       generate(unit, outputPath);
     });
@@ -151,7 +161,14 @@ function generate(unit, outputPath) {
     fs.writeFileSync(outputPath, output);
   } catch (err) {
     if (err.code === 'EACCES') {
-      return log('Not enough permissions to create test file at this location.');
+      throw new UserError(
+        'Not enough permissions to create test file at this location.'
+      );
     }
   }
+
+  log.pref(
+    'Test file for %s "%s" from module "%s" saved to %s.',
+    unit.type, unit.name, unit.module.name, outputPath
+  );
 }

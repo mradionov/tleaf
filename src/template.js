@@ -51,10 +51,10 @@ function load(type, relativePath) {
     templateSource = fs.readFileSync(templatePath, 'utf8');
   } catch (err) {
     if (err.code === 'ENOENT') {
-      throw new UserError('Template file not found');
+      throw new UserError('Template file not found.');
     }
     if (err.code === 'EACCES') {
-      throw new UserError('Not enough permissions to access template file');
+      throw new UserError('Not enough permissions to access template file.');
     }
   }
 
