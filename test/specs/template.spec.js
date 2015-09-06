@@ -5,7 +5,11 @@ var proxyquire = require('proxyquire');
 
 var fsStub = {};
 var cacheStub = {};
-var configStub = {};
+var configStub = {
+  units: {},
+  dependencies: { templateMap: {} },
+  '@noCallThru': true
+};
 
 var template = proxyquire('./../../src/template', {
   'fs-extra': fsStub,

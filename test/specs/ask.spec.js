@@ -1,13 +1,22 @@
 'use strict';
 
 var assert = require('chai').assert;
+var sinon = require('sinon');
 var _ = require('lodash');
 var proxyquire = require('proxyquire');
 
+proxyquire.noPreserveCache();
+
 var inquirerStub = {};
+var configStub = {
+  units: {},
+  dependencies: {},
+  '@noCallThru': true
+};
 
 var ask = proxyquire('../../src/ask', {
-  'inquirer': inquirerStub
+  'inquirer': inquirerStub,
+  './config': configStub
 });
 
 describe('ask', function () {
@@ -65,6 +74,31 @@ describe('ask', function () {
 
     });
 
+    it('should list processed units from config', function () {
+      inquirerStub.prompt = sinon.spy();
+      configStub.units.process = ['foo', 'bar', 'baz'];
+      ask.createUnit(_.noop);
+      var questions = inquirerStub.prompt.getCall(0).args[0];
+      var question = _.findWhere(questions, { name: 'type' });
+      assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
+    });
+
+    it('should list processed dependencies from config', function () {
+      inquirerStub.prompt = function (questions, respond) {
+        inquirerStub.prompt = sinon.spy();
+        respond({
+          name: 'TestCtrl',
+          type: 'controller',
+          module: 'test'
+        });
+      };
+      configStub.dependencies.process = ['foo', 'bar', 'baz'];
+      ask.createUnit(_.noop);
+      var questions = inquirerStub.prompt.getCall(0).args[0];
+      var question = _.findWhere(questions, { name: 'type' });
+      assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
+    });
+
   });
 
   describe('pickUnit', function () {
@@ -103,6 +137,19 @@ describe('ask', function () {
           { name: 'TestProvider', type: 'provider' }
         ]);
       });
+    });
+
+    it('should list processed units from config', function () {
+      inquirerStub.prompt = sinon.spy();
+      configStub.units.process = ['foo', 'bar', 'baz'];
+      ask.identifyDeps([
+        { name: 'TestFactory' },
+        { name: 'TestService' },
+        { name: 'TestProvider' }
+      ], _.noop);
+      var questions = inquirerStub.prompt.getCall(0).args[0];
+      var question = questions[0];
+      assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
     });
 
   });

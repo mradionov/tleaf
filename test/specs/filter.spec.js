@@ -3,11 +3,17 @@
 var assert = require('chai').assert;
 var proxyquire = require('proxyquire');
 
-var configStub = {};
+var configStub = {
+  units: {},
+  dependencies: {},
+  '@noCallThru': true
+};
 
 var filter = proxyquire('./../../src/filter', {
   './config': configStub
 });
+
+////////
 
 describe('filter', function () {
 

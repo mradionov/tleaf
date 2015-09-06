@@ -69,10 +69,7 @@ describe('config/index', function () {
 
   it('should merge in currenly used cached config with default', function () {
     cacheStub.get = function () { return '/cache/tleaf.conf.js'; }
-    fsStub.existsSync = function (path) {
-      console.log(path);
-      return true;
-    }
+    fsStub.existsSync = function (path) { return true; }
     load();
     assert.deepEqual(resolvedConfig, {
       foo: 'moo',

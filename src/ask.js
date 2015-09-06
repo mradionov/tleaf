@@ -122,7 +122,7 @@ function addUnitDependency(deps, callback) {
       type: 'list',
       name: 'type',
       message: 'Dependency type:',
-      choices: config.dependencies.processed,
+      choices: config.dependencies.process,
       when: function (answers) {
         return !isEmptyString(answers.name);
       }
