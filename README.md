@@ -13,14 +13,14 @@ Command line [npm](https://www.npmjs.com/) utility tool built on [Node.js](https
   * [Configuration](#configuration)
   * [Custom templates](#custom-templates)
     * [Data available in templates](#data-available-in-templates)
-    * [Template examples](#template-examples)
-    * [Extra template helpers](#extra-template-helpers)
+    * [Examples](#examples)
+    * [Extra helpers](#extra-helpers)
 
 ## How does it work?
 
-It takes your AngularJS source file and parses it with the help of [esprima](http://esprima.org/) - standard-compliant ECMAScript parser, which results into a code syntax tree. Then it analyzes the tree, looks for AngularJS units and extracts infromation about them. It may ask you some questions to get some more information. Then it generates a test file, based on pre-defined templates, setting up the collected information.
+It takes your AngularJS source file and parses it with the help of [esprima](http://esprima.org/) - standard-compliant ECMAScript parser, which results into a code syntax tree. Then this it analyzes the tree, looks for AngularJS units and extracts infromation about them. It may ask you some questions to get some more information. Then it generates a test file, based on pre-defined templates, setting up the collected information as a unit test.
 
-*Note: source code can be very different and complex from project to project (and from person to person), so it's really difficult to cover all cases and styles of writing AngularJS applications to be able to extract required information. If your AngularJs source code is not getting parsed as expected, feel free to create an issue with an example of the source code causing the problem.*
+*Note: source code can be very different and complex from project to project (and from person to person), so it's really difficult to cover all cases and styles of writing AngularJS applications to be able to extract required information. If your AngularJS source code is not getting parsed as expected, feel free to create an issue with an example of the source code causing the problem or PR a test reproducing it.*
 
 ## Installation
 
@@ -41,7 +41,7 @@ $ tleaf [/path/to/source.js] [/path/to/output.spec.js]
 * `[/path/to/source.js]` - path to AngularJS source code with a unit to test
 * `[/path/to/output.spec.js]` - path to output test file
 
-The command parses your source file and extracts all AngularJS units. After that you will be asked which one you'd want to test. The result will be a test file based on template for this unit type.
+The command parses your source file and extracts all AngularJS units. After that you will be asked which one you'd want to test. The result will be a test file generated based on template for this unit type.
 
 ***
 
@@ -51,7 +51,7 @@ $ tleaf create [/path/to/output.spec.js]
 
 * `[/path/to/output.spec.js]` - path to output test file
 
-The command creates a test file based on answers you provide for a number of questions: what is a name of the unit? what is a type of the unit? what are unit's dependencies? The result will be a test file based on template for this unit type.
+The command creates a test file based on answers you provide for a number of questions: what is a name of the unit? what is a type of the unit? what are unit's dependencies? The result will be a test file generated based on template for this unit type.
 
 ***
 
@@ -61,7 +61,7 @@ $ tleaf init [/path/to/folder]
 
 * `[/path/to/folder]` - path to output folder
 
-The command copies default templates to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. That folder will also contain a configuration file for additional options called `config.js`. This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be included under version control system, but it is not required at all, it's up to you.
+The command copies default templates to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. That folder will also contain a configuration file for additional options called `telaf.conf.js`. This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be included under version control system, but it is not required at all, it's up to you.
 
 ***
 
@@ -69,7 +69,7 @@ The command copies default templates to a directory you've provided. You'll be a
 $ tleaf use [/path/to/config.js]
 ```
 
-* `[/path/to/config.js]` - path to configuration file
+* `[/path/to/tleaf.conf.js]` - path to configuration file
 
 The command sets current configuration which will be used to generate test files. It accepts a path to a configuration file inside a folder, which was created by executing a command `tleaf init [/path/to/folder]`. This command allows you to use different configurations and set of templates.
 
@@ -92,74 +92,84 @@ $ tleaf current
 ## Configuration
 
 When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
-By default configuration file `config.js` is empty, the default configuration is used ([see default configuration file](src/config/default.js)). Available options:
+By default configuration file `tleaf.conf.js` contains only a few commonly used options, ([see default configuration file](src/config/default.js)) for a complete reference. Your configuration will be merged on top of the default configuration. Available options:
 
 * `indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces to replace one tab.
 
   ```js
-  module.exports = {
-    indent: '  '    // 1 tab = 2 spaces,
-    indent: '\t'    // 1 tab = 1 tab
-    indent: 4       // 1 tab = 4 spaces
-    indent: '--'    // 1 tab = '--'
+  module.exports = function (config) {
+    config.set({
+      indent: '  '    // 1 tab = 2 spaces,
+      indent: '\t'    // 1 tab = 1 tab
+      indent: 4       // 1 tab = 4 spaces
+      indent: '--'    // 1 tab = '--'
+    });
   };
   ```
 
 * `units.process: [array]` - array of unit types which should be parsed and processed. To reorder the appearance of unit types change their order in this array.
 
   ```js
-  module.exports = {
-    units: {
-      // process only controllers, directives and providers
-      // these types will appear in the exact same order
-      process: ['controller', 'directive', 'provider']
-    }
-  };
-  ```
-
-* `dependencies.process: [array]` - array of provider types which should be parsed and processed. To reorder the appearance of provider types change their order in this array.
-
-  ```js
-  module.exports = {
-    dependencies: {
-      // process only services and values, others will be ignored
-      // these types will appear in the exact same order, which means that
-      // all services will be rendered first, then all the values, etc.
-      process: ['service', 'value']
-    }
-  };
-  ```
-
-* `dependencies.filter: [array]` - array of provider names, which should be ignored, by default only `$scope` is filtered out.
-
-  ```js
-  module.exports = {
-    dependencies: {
-      // ignore dependencies with these names
-      filter: ['$scope', 'GlobalService', 'SECRET_CONST']
-    }
-  };
-  ```
-
-* `dependencies.templateMap: [object]` - object, which maps provider types with templates they should use. May be useful, when you want to render *factories* or *services* using *value* template.
-
-  ```js
-  module.exports = {
-    dependencies: {
-      templateMap: {
-        'provider': 'provider', // use default provider template
-        'service': 'value',     // use value template for service
-        'factory': 'service'    // use service template for factory
+  module.exports = function (config) {
+    config.set({
+      units: {
+        // process only controllers, directives and providers
+        // these types will appear in the exact same order
+        process: ['controller', 'directive', 'provider']
       }
-    }
+    });
+  };
+  ```
+
+* `dependencies.process: [array]` - array of dependency types which should be parsed and processed. To reorder the appearance of dependency types change their order in this array.
+
+  ```js
+  module.exports = function (config) {
+    config.set({
+      dependencies: {
+        // process only services and values, others will be ignored
+        // these types will appear in the exact same order, which means that
+        // all services will be rendered first, then all the values, etc.
+        process: ['service', 'value']
+      }
+    });
+  };
+  ```
+
+* `dependencies.filter: [array]` - array of dependency names, which should be ignored, by default only `$scope` is filtered out.
+
+  ```js
+  module.exports = function (config) {
+    config.set({
+      dependencies: {
+        // ignore dependencies with these names
+        filter: ['$scope', 'GlobalService', 'SECRET_CONST']
+      }
+    });
+  };
+  ```
+
+* `dependencies.templateMap: [object]` - object, which maps dependency types with templates they should use. May be useful, when you want to render *factories* or *services* using *value* template.
+
+  ```js
+  module.exports = function (config) {
+    config.set({
+      dependencies: {
+        templateMap: {
+          'provider': 'provider', // use default provider template
+          'service': 'value',     // use value template for service
+          'factory': 'service'    // use service template for factory
+        }
+      }
+    });
   };
   ```
 
 ## Custom templates
 
-Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to fill it with the gathered data.
+Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to be able to fill it with the gathered data.
 When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
-Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are completed by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates).
+Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are made by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates).
 Templates are processed by the templating engine called [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
 
 ### Data available in templates
@@ -243,7 +253,7 @@ Information, which is being collected by a parser or from your answers, gets pas
 }
 ```
 
-### Template examples
+### Examples
 
 Here you can find some examples of composing the templates. You can discover more use-cases by looking at [default templates](src/defaults/templates).
 
@@ -282,7 +292,7 @@ Here you can find some examples of composing the templates. You can discover mor
   ```js
   module(function ($provide) {
     {{#each deps}}
-    {{> (this.provider) this}} // renders a partial for current dep type
+    {{> (this.partial) this}} // renders a partial for a current dependency
     {{/each}}
   });
   ```
@@ -302,7 +312,7 @@ Here you can find some examples of composing the templates. You can discover mor
   });
   ```
 
-### Extra template helpers
+### Extra helpers
 
 Handlerbars allows to create custom helpers to help render the data, here are some of them built-in in the module, which might be helpful:
 
@@ -325,13 +335,3 @@ Handlerbars allows to create custom helpers to help render the data, here are so
   ```
 
 * `{{defaults value defaultValue}}` - renders *value* if it is not *undefined*, *defaultValue* otherwise.
-
-## Test
-
-```bash
-$ npm install
-$ npm test
-```
-
-## License
-MIT © [Michael Radionov](https://github.com/mradionov)
