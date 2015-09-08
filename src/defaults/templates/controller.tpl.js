@@ -2,10 +2,8 @@ describe('Controller: {{name}}', function () {
 
 	var scope, {{name}}{{and arg.deps}};
 
-	// Initialize the controller and scope
 	beforeEach(function () {
 
-		// Load the controller's module
 		module('{{module}}');
 
 		module(function ($provide) {
@@ -14,8 +12,6 @@ describe('Controller: {{name}}', function () {
 			{{/each}}
 		});
 
-		// Inject in angular constructs otherwise,
-		//	you would need to inject these into each test
 		inject(function ($controller{{and arg._deps_}}) {
 			scope = {};
 

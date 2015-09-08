@@ -1,56 +1,26 @@
 describe('Service: {{name}}', function () {
 
-	var httpBackend;
+	var {{name}};
 
-	// Use to provide any mocks needed
-	function _provide(callback) {
-		// Execute callback with $provide
+	beforeEach(function () {
+
+		module('{{module}}');
+
 		module(function ($provide) {
-			callback($provide);
+			{{#each deps}}
+			{{> (this.partial) this}}
+			{{/each}}
 		});
-	}
 
-	// Use to inject the code under test
-	function _inject() {
-		inject(function ($httpBackend{{and arg._deps_}}) {
-			httpBackend = $httpBackend;
+		inject(function (_{{name}}_{{and arg._deps_}}) {
+			{{name}} = _{{name}}_;
 
 			{{#each deps}}
 			{{this.name}} = _{{this.name}}_;
 			{{/each}}
 		});
-	}
-
-	// Call this before each test, except where you are testing for errors
-	function _setup() {
-		// Mock any expected data
-		_provide(function (provide) {
-			{{#each deps}}
-			{{> (this.partial) this provide='provide'}}
-			{{/each}}
-		});
-
-		// Inject the code under test
-		_inject();
-	}
-
-	beforeEach(function () {
-		// Load the service's module
-		module('{{module}}');
-	});
-
-	// make sure no expectations were missed in your tests.
-	// (e.g. expectGET or expectPOST)
-	afterEach(function () {
-		httpBackend.verifyNoOutstandingExpectation();
-		httpBackend.verifyNoOutstandingRequest();
 	});
 
 	// Specs here
-
-	beforeEach(function () {
-		// Inject with expected values
-		_setup();
-	});
 
 });
