@@ -21,6 +21,15 @@ process.on('uncaughtException', function (err) {
   }
 });
 
+// inquirer may not work with some Windows terminal wrappers
+// better show user friendly message about it
+// https://github.com/SBoudrias/Inquirer.js/issues/272
+if (!process.stdout.isTTY) {
+  throw new UserError(
+    'The type of the terminal you use is not supported (not tty).'
+  );
+}
+
 // read user input
 
 var args = process.argv.slice(2);
