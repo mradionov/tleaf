@@ -1,3 +1,3 @@
-{{defaults provide '$provide'}}.service('{{name}}', function () {
+$provide.service('{{name}}', function () {
 
 });

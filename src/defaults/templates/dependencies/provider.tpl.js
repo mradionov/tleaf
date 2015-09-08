@@ -1,4 +1,4 @@
-{{defaults provide '$provide'}}.provider('{{name}}', function () {
+$provide.provider('{{name}}', function () {
 	this.$get = function () {
 		return {};
 	};

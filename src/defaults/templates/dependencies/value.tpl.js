@@ -1,1 +1,1 @@
-{{defaults provide '$provide'}}.value('{{name}}', {});
+$provide.value('{{name}}', {});

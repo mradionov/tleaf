@@ -1,3 +1,3 @@
-{{defaults provide '$provide'}}.factory('{{name}}', function () {
+$provide.factory('{{name}}', function () {
 
 });

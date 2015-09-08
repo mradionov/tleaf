@@ -1,1 +1,1 @@
-{{defaults provide '$provide'}}.constant('{{name}}', '');
+$provide.constant('{{name}}', '');
