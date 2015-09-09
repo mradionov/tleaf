@@ -2,19 +2,26 @@
 
 var assert = require('chai').assert;
 
-var helpers = require('./../../../src/render/helpers');
+var render = require('./../../../src/render');
 
 describe('render/helpers', function () {
 
   describe('and', function () {
 
-    it('should join array elements with leading comma', function () {
-      var result = helpers.and(['foo', 'bar', 'baz']);
-      assert.equal(result, ', foo, bar, baz');
+    it('should join array and prepend comma', function () {
+      var data = { arr: [1, 2, 3] };
+      var result = render('{{and arr}}', data);
+      assert.equal(result, ', 1, 2, 3');
     });
 
-    it('should return empty string if array is empty', function () {
-      var result = helpers.and([]);
+    it('should display nothing for empty array', function () {
+      var data = { arr: [] };
+      var result = render('{{and arr}}', data);
+      assert.equal(result, '');
+    });
+
+    it('should display nothing for falsy array', function () {
+      var result = render('{{and arr}}');
       assert.equal(result, '');
     });
 
@@ -22,13 +29,20 @@ describe('render/helpers', function () {
 
   describe('only', function () {
 
-    it('should join array element', function () {
-      var result = helpers.only(['foo', 'bar', 'baz']);
-      assert.equal(result, 'foo, bar, baz');
+    it('should join array', function () {
+      var data = { arr: [1, 2, 3] };
+      var result = render('{{only arr}}', data);
+      assert.equal(result, '1, 2, 3');
     });
 
-    it('should return empty string if array is empty', function () {
-      var result = helpers.only([]);
+    it('should display nothing for empty array', function () {
+      var data = { arr: [] };
+      var result = render('{{only arr}}', data);
+      assert.equal(result, '');
+    });
+
+    it('should display nothing for falsy array', function () {
+      var result = render('{{only arr}}');
       assert.equal(result, '');
     });
 
@@ -36,13 +50,15 @@ describe('render/helpers', function () {
 
   describe('dashCase', function () {
 
-    it('should convert UpperCamelCase', function () {
-      var result = helpers.dashCase('MyDir');
+    it('should dashCase a camelCase', function () {
+      var data = { name: 'myDir' };
+      var result = render('{{dashCase name}}', data);
       assert.equal(result, 'my-dir');
     });
 
-    it('should convert camelCase', function () {
-      var result = helpers.dashCase('myDir');
+    it('should dashCase an UpperCamelCase', function () {
+      var data = { name: 'MyDir' };
+      var result = render('{{dashCase name}}', data);
       assert.equal(result, 'my-dir');
     });
 
@@ -50,19 +66,21 @@ describe('render/helpers', function () {
 
   describe('defaults', function () {
 
-    it('should return truthy value', function () {
-      var result = helpers.defaults('foo', 'bar');
-      assert.equal(result, 'foo');
+    it('should display truthy value', function () {
+      var data = { value: 10 };
+      var result = render('{{defaults value 20}}', data);
+      assert.equal(result, '10');
     });
 
-    it('should return falsy value', function () {
-      var result = helpers.defaults(false, 'bar');
-      assert.equal(result, false);
+    it('should display falsy value', function () {
+      var data = { value: 0 };
+      var result = render('{{defaults value 20}}', data);
+      assert.equal(result, '0');
     });
 
     it('should fallback to default for undefined value', function () {
-      var result = helpers.defaults(undefined, 'bar');
-      assert.equal(result, 'bar');
+      var result = render('{{defaults value 20}}');
+      assert.equal(result, '20');
     });
 
   });

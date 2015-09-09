@@ -31,12 +31,12 @@ helpers.defaults = function (value, defaultValue) {
 ////////
 
 function join(array, delimiter) {
-  return array.join(delimiter || ', ');
+  return (array || []).join(delimiter || ', ');
 }
 
 
 function leftJoin(array, delimiter) {
-  if (!array.length) { return ''; }
+  if (!(array && array.length)) { return ''; }
   var copy = array.slice();
   copy.unshift('');
   return join(copy, delimiter);
