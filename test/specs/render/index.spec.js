@@ -4,6 +4,7 @@ var assert = require('chai').assert;
 var proxyquire = require('proxyquire');
 
 var configStub = {
+  template: {},
   units: {},
   dependencies: {},
   '@noCallThru': true
@@ -21,23 +22,41 @@ describe('render/index', function () {
 
     it('should keep tabs indent', function () {
       var source = '		'; // tabs here
-      configStub.indent = '\t';
+      configStub.template.indent = '\t';
       var result = render(source);
       assert.equal(result, '		'); // tabs here
     });
 
     it('should replace tabs with string', function () {
       var source = '		'; // tabs here
-      configStub.indent = 4;
+      configStub.template.indent = 4;
       var result = render(source);
       assert.equal(result, '        '); // spaces here
     });
 
     it('should replace tabs with string', function () {
       var source = '		'; // tabs here
-      configStub.indent = '--';
+      configStub.template.indent = '--';
       var result = render(source);
       assert.equal(result, '----');
+    });
+
+  });
+
+  describe('use strict', function () {
+
+    it('should add statement if enabled in config', function () {
+      var source = '{{>useStrict}}';
+      configStub.template.useStrict = true;
+      var result = render(source);
+      assert.include(result, "'use strict';");
+    });
+
+    it('should not add statement if disabled in config', function () {
+      var source = '{{>useStrict}}';
+      configStub.template.useStrict = false;
+      var result = render(source);
+      assert.equal(result, '');
     });
 
   });

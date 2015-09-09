@@ -94,15 +94,29 @@ $ tleaf current
 When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
 By default configuration file `tleaf.conf.js` contains only a few commonly used options, ([see default configuration file](src/config/default.js)) for a complete reference. Your configuration will be merged on top of the default configuration. Available options:
 
-* `indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces to replace one tab.
+* `template.indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces to replace one tab.
 
   ```js
   module.exports = function (config) {
     config.set({
-      indent: '  '    // 1 tab = 2 spaces,
-      indent: '\t'    // 1 tab = 1 tab
-      indent: 4       // 1 tab = 4 spaces
-      indent: '--'    // 1 tab = '--'
+      template: {
+        indent: '  '    // 1 tab = 2 spaces,
+        indent: '\t'    // 1 tab = 1 tab
+        indent: 4       // 1 tab = 4 spaces
+        indent: '--'    // 1 tab = '--'
+      }
+    });
+  };
+  ```
+* `template.useStrict: [bool]` - include `'use strict';` to the top of the generated test file
+
+  ```js
+  module.exports = function (config) {
+    config.set({
+      template: {
+        useStrict: true     // include
+        useStrict: false    // don't include
+      }
     });
   };
   ```

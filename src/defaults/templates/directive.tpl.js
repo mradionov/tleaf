@@ -1,3 +1,4 @@
+{{>useStrict}}
 describe('Directive: {{name}}', function () {
 	var element, scope, compile, defaultData,
 			validTemplate = '<{{dashCase name}} ng-model="data"></{{dashCase name}}>';

@@ -1,3 +1,4 @@
+{{>useStrict}}
 describe('Factory: {{name}}', function () {
 	var {{name}};
 

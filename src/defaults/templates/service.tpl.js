@@ -1,3 +1,4 @@
+{{>useStrict}}
 describe('Service: {{name}}', function () {
 
 	var {{name}};

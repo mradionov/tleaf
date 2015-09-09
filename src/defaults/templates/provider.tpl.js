@@ -1,3 +1,4 @@
+{{>useStrict}}
 describe('Provider: {{name}}', function () {
 	var {{name}}Provider;
 

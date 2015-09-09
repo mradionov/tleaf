@@ -1,3 +1,4 @@
+{{>useStrict}}
 describe('Filter: {{name}}', function () {
 	var {{name}};
 

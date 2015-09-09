@@ -1,3 +1,4 @@
+{{>useStrict}}
 describe('Controller: {{name}}', function () {
 
 	var scope, {{name}}{{and arg.deps}};

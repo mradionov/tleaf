@@ -1,3 +1,4 @@
+{{>useStrict}}
 describe('Value: {{name}}', function () {
 
 	var {{name}};

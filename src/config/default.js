@@ -1,9 +1,15 @@
 module.exports = function (config) {
   config.set({
-    // By default templates use tab for indentation
-    // You can pass any string and each tab will be replaced with that string.
-    // You can pass integer and it will be a number of spaces for indentation.
-    indent: '\t',
+
+    template: {
+      // By default templates use tab for indentation
+      // You can pass any string and each tab will be replaced with that string.
+      // You can pass integer and it will be a number of spaces for indentation.
+      indent: '\t',
+
+      // Include "use strict" statement to the top of the generated test file
+      useStrict: true
+    },
 
     units: {
 
@@ -20,8 +26,8 @@ module.exports = function (config) {
     dependencies: {
 
       // List the dependencies which should be processed. Only the
-      // types mentioned here will be asked about and be included in generated
-      // test code. The order they appear can be changed by reordering these keys.
+      // types mentioned here will be included in generated test code.
+      // The order they appear can be changed by reordering these keys.
       process: ['provider', 'service', 'factory', 'value', 'constant'],
 
       // Exclude particular dependencies, there won't be any test code generated
@@ -39,5 +45,6 @@ module.exports = function (config) {
       }
 
     }
+
   });
 };

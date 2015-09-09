@@ -1,3 +1,4 @@
+{{>useStrict}}
 describe('Constant: {{name}}', function () {
 
 	var {{name}};
