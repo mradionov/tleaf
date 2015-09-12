@@ -12,7 +12,7 @@ var defaultConfigStub = function (config) {
   config.set({
     foo: 'bar',
     baz: {
-      qux: [1, 2, 3],
+      qux: [7, 1, 2, 3],
       doo: false
     }
   });
@@ -22,7 +22,7 @@ var cachedConfigStub = function (config) {
     foo: 'moo',
     boo: 'bar',
     baz: {
-      qux: [1, 5, 3],
+      qux: [4, 5, 9],
       woo: true
     }
   });
@@ -48,7 +48,7 @@ describe('config/index', function () {
     assert.deepEqual(resolvedConfig, {
       foo: 'bar',
       baz: {
-        qux: [1, 2, 3],
+        qux: [7, 1, 2, 3],
         doo: false
       }
     });
@@ -61,7 +61,7 @@ describe('config/index', function () {
     assert.deepEqual(resolvedConfig, {
       foo: 'bar',
       baz: {
-        qux: [1, 2, 3],
+        qux: [7, 1, 2, 3],
         doo: false
       }
     });
@@ -75,7 +75,7 @@ describe('config/index', function () {
       foo: 'moo',
       boo: 'bar',
       baz: {
-        qux: [1, 5, 3],
+        qux: [4, 5, 9],
         doo: false,
         woo: true
       }
