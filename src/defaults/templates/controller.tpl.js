@@ -1,7 +1,7 @@
 {{>useStrict}}
 describe('Controller: {{name}}', function () {
 
-	var scope, {{name}}{{and arg.deps}};
+	var $scope, {{name}}{{and arg.deps}};
 
 	beforeEach(function () {
 
@@ -14,14 +14,13 @@ describe('Controller: {{name}}', function () {
 		});
 
 		inject(function ($controller{{and arg._deps_}}) {
-			scope = {};
-
+			$scope = {};
 			{{#each deps}}
 			{{this.name}} = _{{this.name}}_;
 			{{/each}}
 
 			{{name}} = $controller('{{name}}', {
-				$scope: scope
+				$scope: $scope
 			});
 		});
 

@@ -17,7 +17,7 @@ var testBasePath = path.join('test', 'app', 'test');
 ////////
 
 generate('controller', 'MyCtrl', { '$http': 'provider', 'MyService': 'service' });
-generate('service', 'MyService', { '$http': 'provider', 'MyFactory': 'factory' });
+generate('service', 'MyService', { '$http': 'provider' });
 generate('factory', 'MyFactory', { '$http': 'provider', 'MyService': 'service' });
 generate('directive', 'myDir', { '$http': 'provider', 'MyService': 'service' });
 generate('provider', 'MyProv', { '$http': 'provider', 'MyService': 'service' });

@@ -9,7 +9,7 @@
     };
   })
 
-  .service('MyService', function ($http, MyFactory) {
+  .service('MyService', function ($http) {
     this.foo = 'bar';
     this.baz = function () {
       return 'qux';

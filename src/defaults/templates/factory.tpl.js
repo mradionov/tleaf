@@ -1,6 +1,6 @@
 {{>useStrict}}
 describe('Factory: {{name}}', function () {
-	var {{name}};
+	var {{name}}{{and arg.deps}};
 
 	beforeEach(function () {
 
@@ -14,7 +14,6 @@ describe('Factory: {{name}}', function () {
 
 		inject(function (_{{name}}_{{and arg._deps_}}) {
 			{{name}} = _{{name}}_;
-
 			{{#each deps}}
 			{{this.name}} = _{{this.name}}_;
 			{{/each}}

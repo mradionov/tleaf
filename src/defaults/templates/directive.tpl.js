@@ -1,17 +1,18 @@
 {{>useStrict}}
 describe('Directive: {{name}}', function () {
-	var element, scope, compile, defaultData,
-			validTemplate = '<{{dashCase name}} ng-model="data"></{{dashCase name}}>';
+	var $scope, $compile{{and arg.deps}};
+	var element, defaultData;
+	var validTemplate = '<{{dashCase name}} ng-model="data"></{{dashCase name}}>';
 
 	function createDirective(data, template) {
 		var elm;
 
-		scope.data = data || defaultData;
+		$scope.data = data || defaultData;
 
-		elm = compile(template || validTemplate)(scope);
+		elm = $compile(template || validTemplate)($scope);
 
 		// Trigger watchers
-		// scope.$apply();
+		// $scope.$apply();
 
 		return elm;
 	}
@@ -29,10 +30,9 @@ describe('Directive: {{name}}', function () {
 			{{/each}}
 		});
 
-		inject(function ($rootScope, $compile{{and arg._deps_ }}) {
-			scope = $rootScope.$new();
-			compile = $compile;
-
+		inject(function (_$rootScope_, _$compile_{{and arg._deps_ }}) {
+			$scope = _$rootScope_.$new();
+			$compile = _$compile_;
 			{{#each deps}}
 			{{this.name}} = _{{this.name}}_;
 			{{/each}}
