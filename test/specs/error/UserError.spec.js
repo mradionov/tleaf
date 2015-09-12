@@ -43,4 +43,9 @@ describe('error/UserError', function () {
     assert.isUndefined(err.stack);
   });
 
+  it('should use user error message if original error missing', function () {
+    var err = new UserError('foo bar');
+    assert.equal(err.message, 'foo bar');
+  });
+
 });

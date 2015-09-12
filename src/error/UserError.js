@@ -8,7 +8,7 @@ function UserError(userMessage, originalError) {
 
   this.name = 'UserError';
   this.userMessage = userMessage;
-  this.message = originalError.message;
+  this.message = originalError.message || userMessage;
   this.stack = originalError.stack;
 }
 

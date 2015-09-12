@@ -79,6 +79,12 @@ function parse(source) {
 
     var deps = findDeps(call.node, call.scope, type);
 
+    // Angular should not allow having circular dependency, but if
+    // there is any in a source code, do not continue execution
+    if (_.findWhere(deps, { name: name })) {
+      throw new UserError('Circular dependency for ' + type + ' "' + name + '".');
+    }
+
     var unit = {
       name: name,
       type: type,

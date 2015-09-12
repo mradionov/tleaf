@@ -3,6 +3,7 @@
 var assert = require('chai').assert;
 
 var parse = require('./../../../src/parse');
+var UserError = require('./../../../src/error/UserError');
 
 describe('parse/unit', function () {
 
@@ -236,6 +237,24 @@ describe('parse/unit', function () {
     var units = parse(source);
 
     assert.deepEqual(units, []);
+  });
+
+  it('should throw user error for invalid code', function () {
+    var source = "angular.module('test' [])";
+
+    var fn = function () { parse(source); };
+
+    assert.throw(fn, UserError);
+  });
+
+  it('should throw user error for circular reference', function () {
+    var source =
+    "angular.module('test', [])" +
+    ".service('TestService', function (TestService) {});";
+
+    var fn = function () { parse(source); };
+
+    assert.throw(fn, UserError);
   });
 
 });
