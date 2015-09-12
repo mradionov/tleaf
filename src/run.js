@@ -4,6 +4,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var _ = require('./lib/lodash.mixin');
 
+var C = require('./constants');
 var config = require('./config');
 var parse = require('./parse');
 var ask = require('./ask');
@@ -22,26 +23,47 @@ var run = module.exports = {};
 ////////
 
 run.init = function (initPathArg) {
-  var initPath = path.resolve(initPathArg);
-  var configFileName = 'config.js';
-  var configPath = path.join(initPath, configFileName);
-  var defaultsPath = path.join(__dirname, 'defaults');
+  initPathArg = initPathArg || '';
+  var initConfigPath = path.join(path.resolve(initPathArg), C.CONFIG_FILE_NAME);
+  var defaultConfigPath = path.join(__dirname, 'defaults', C.CONFIG_FILE_NAME);
 
-  if (fs.existsSync(initPath)) {
-    throw new UserError(
-      'Directory (or file) already exists at this location. Use another path.'
-    );
+  if (fs.existsSync(initConfigPath)) {
+    throw new UserError('Configuration file already exists at this location.');
   }
 
-  cache.set('useConfig', configPath);
+  cache.set(C.CACHE_USE_CONFIG_KEY, initConfigPath);
 
   try {
-    fs.copySync(defaultsPath, initPath);
+    fs.copySync(defaultConfigPath, initConfigPath);
+  } catch (err) {
+    if (err.code === 'EACCES') {
+      throw new UserError('Not enough permissions to create file.', err);
+    }
+    cache.remove(C.CACHE_USE_CONFIG_KEY);
+  }
+
+  run.current();
+};
+
+run.clone = function (clonePathArg) {
+  clonePathArg = clonePathArg || '';
+  var clonePath = path.join(path.resolve(clonePathArg), C.CLONE_DIR_NAME);
+  var configPath = path.join(clonePath, C.CONFIG_FILE_NAME);
+  var defaultsPath = path.join(__dirname, 'defaults');
+
+  if (fs.existsSync(clonePath)) {
+    throw new UserError('Directory (or file) already exists at this location.');
+  }
+
+  cache.set(C.CACHE_USE_CONFIG_KEY, configPath);
+
+  try {
+    fs.copySync(defaultsPath, clonePath);
   } catch (err) {
     if (err.code === 'EACCES') {
       throw new UserError('Not enough permissions to create directory.', err);
     }
-    cache.remove('useConfig');
+    cache.remove(C.CACHE_USE_CONFIG_KEY);
   }
 
   run.current();
@@ -55,19 +77,19 @@ run.use = function (usePathArg) {
     throw new UserError('Configuration file not found.');
   }
 
-  cache.set('useConfig', usePath);
+  cache.set(C.CACHE_USE_CONFIG_KEY, usePath);
   run.current();
 };
 
 
 run.default = function () {
-  cache.remove('useConfig');
+  cache.remove(C.CACHE_USE_CONFIG_KEY);
   run.current();
 };
 
 
 run.current = function () {
-  var usePath = cache.get('useConfig');
+  var usePath = cache.get(C.CACHE_USE_CONFIG_KEY);
   if (!usePath) {
     log.pref('Using default config.');
   } else {
@@ -86,8 +108,8 @@ run.create = function (outputPathArg) {
 
 
 run.parse = function (sourcePathArg, outputPathArg) {
-  var sourcePath = path.resolve(sourcePathArg),
-      outputPath = path.resolve(outputPathArg);
+  var sourcePath = path.resolve(sourcePathArg);
+  var outputPath = path.resolve(outputPathArg);
 
   var source = '';
   try {

@@ -2,6 +2,8 @@
 
 var _ = require('lodash');
 
+var C = require('./constants');
+
 ////////
 
 var log = module.exports = {};
@@ -21,7 +23,7 @@ log.error = function () {
 };
 
 log.pref = function () {
-  var prefix = '[tleaf]: ';
+  var prefix = '[' + C.MODULE_NAME + ']: ';
   var args = _.toArray(arguments);
   var first = prefix += args.shift();
   console.log.apply(console, [first].concat(args));

@@ -32,46 +32,54 @@ $ npm i tleaf -g
 
 ## Usage
 
-***
-
 ```bash
-$ tleaf [/path/to/source.js] [/path/to/output.spec.js]
+$ tleaf SOURCE DEST
 ```
 
-* `[/path/to/source.js]` - path to AngularJS source code with a unit to test
-* `[/path/to/output.spec.js]` - path to output test file
+* `SOURCE` - path to AngularJS source code with a unit to test
+* `DEST` - path to output test file
 
 The command parses your source file and extracts all AngularJS units. After that you will be asked which one you'd want to test. The result will be a test file generated based on template for this unit type.
 
 ***
 
 ```bash
-$ tleaf create [/path/to/output.spec.js]
+$ tleaf create DEST
 ```
 
-* `[/path/to/output.spec.js]` - path to output test file
+* `DEST` - path to output test file
 
 The command creates a test file based on answers you provide for a number of questions: what is a name of the unit? what is a type of the unit? what are unit's dependencies? The result will be a test file generated based on template for this unit type.
 
 ***
 
 ```bash
-$ tleaf init [/path/to/folder]
+$ tleaf init [DIRECTORY]
 ```
 
-* `[/path/to/folder]` - path to output folder
+* `[DIRECTORY]` - *(optional)* path to output folder
 
-The command copies default templates to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. That folder will also contain a configuration file for additional options called `telaf.conf.js`. This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be included under version control system, but it is not required at all, it's up to you.
+The command copies a configuration file to a directory you've provided.
 
 ***
 
 ```bash
-$ tleaf use [/path/to/config.js]
+$ tleaf clone [DIRECTORY]
 ```
 
-* `[/path/to/tleaf.conf.js]` - path to configuration file
+* `[DIRECTORY]` - *(optional)* path to output folder
 
-The command sets current configuration which will be used to generate test files. It accepts a path to a configuration file inside a folder, which was created by executing a command `tleaf init [/path/to/folder]`. This command allows you to use different configurations and set of templates.
+The command copies default templates to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. That folder will also contain a configuration file for additional options called `tleaf.conf.js`. This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be included under version control system, but it is not required at all, it's up to you.
+
+***
+
+```bash
+$ tleaf use CONFIG
+```
+
+* `CONFIG` - path to configuration file
+
+The command sets current configuration which will be used to generate test files. It accepts a path to a configuration file created by executing a command `tleaf init [DIRECTORY]` or a configuration file inside a folder, which was created by executing a command `tleaf clone [DIRECTORY]`. This command allows you to use different configurations and set of templates.
 
 ***
 
@@ -79,7 +87,7 @@ The command sets current configuration which will be used to generate test files
 $ tleaf use default
 ```
 
-  The command allows to switch back to default templates.
+  The command allows to switch back to default config and templates.
 
 ***
 
@@ -89,10 +97,11 @@ $ tleaf current
 
   The command shows which configuration is used at the moment.
 
+***
+
 ## Configuration
 
-When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
-By default configuration file `tleaf.conf.js` contains only a few commonly used options, ([see default configuration file](src/config/default.js)) for a complete reference. Your configuration will be merged on top of the default configuration. Available options:
+By default configuration file `tleaf.conf.js` contains only a few commonly used options, [see default configuration file](src/config/default.js) for a complete reference. Your configuration will be merged on top of the default configuration. Available options:
 
 * `template.indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces to replace one tab.
 
@@ -182,7 +191,7 @@ By default configuration file `tleaf.conf.js` contains only a few commonly used 
 ## Custom templates
 
 Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to be able to fill it with the gathered data.
-When you run the command `tleaf init [/path/to/folder]`, all default templates and a configuration file are copied to the location you've provided.
+When you run the command `tleaf clone [DIRECTORY]`, all default templates and a configuration file are copied to the location you've provided.
 Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are made by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates).
 Templates are processed by the templating engine called [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
 

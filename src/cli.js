@@ -1,6 +1,8 @@
 'use strict';
 
 var _ = require('lodash');
+
+var C = require('./constants');
 var run = require('./run');
 var log = require('./log');
 var UserError = require('./error/UserError');
@@ -43,8 +45,11 @@ case 'create':
   break;
 
 case 'init':
-  validate(args[1], 'Missing path to output folder.', 'init');
   run.init(args[1]);
+  break;
+
+case 'clone':
+  run.clone(args[1]);
   break;
 
 case 'use':
@@ -89,22 +94,27 @@ function help(one) {
   var commands = [
     {
       name: 'parse',
-      usage: '[/path/to/source.js] [/path/to/output.spec.js]',
+      usage: 'SOURCE DEST',
       description: 'Create a test by parsing existing AngularJS source file.'
     },
     {
       name: 'create',
-      usage: 'create [/path/to/output.spec.js]',
+      usage: 'create DEST',
       description: 'Create a test by manually entering details.'
     },
     {
       name: 'init',
-      usage: 'init [/path/to/folder]',
+      usage: 'init [DIRECTORY]',
+      description: 'Initialize config file.'
+    },
+    {
+      name: 'clone',
+      usage: 'clone [DIRECTORY]',
       description: 'Copy default config and templates to a folder.'
     },
     {
       name: 'use',
-      usage: 'use [/path/to/config.js]',
+      usage: 'use CONFIG',
       description: 'Use destination config and templates.'
     },
     {
@@ -124,7 +134,7 @@ function help(one) {
 
   if (!one) {
     output += '\n';
-    output += 'tleaf - AngularJS unit test generator.';
+    output += C.MODULE_NAME + ' - AngularJS unit test generator.';
     output += '\n';
   }
 
@@ -136,7 +146,7 @@ function help(one) {
     if (!one || one === command.name) {
       var message = '';
       message += '\n';
-      message += '  tleaf ' + command.usage + '\n';
+      message += '  ' + C.MODULE_NAME + ' ' + command.usage + '\n';
       message += '    ' + command.description + '\n';
 
       output += message;

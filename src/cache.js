@@ -5,6 +5,8 @@ var path = require('path');
 var os = require('os');
 var _ = require('lodash');
 var basedir = require('xdg-basedir');
+
+var C = require('./constants');
 var UserError = require('./error/UserError');
 
 ////////
@@ -53,9 +55,7 @@ cache.remove = function (path) {
 
 cache.path = function () {
   var basePath = basedir.cache || os.tempdir();
-  var cacheDir = '.tleaf';
-  var cacheFileName = 'cache.json';
-  var cachePath = path.join(basePath, cacheDir, cacheFileName);
+  var cachePath = path.join(basePath, C.CACHE_DIR_NAME, C.CACHE_FILE_NAME);
   return cachePath;
 };
 

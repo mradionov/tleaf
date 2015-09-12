@@ -3,6 +3,7 @@
 var fs = require('fs-extra');
 var path = require('path');
 
+var C = require('./constants');
 var cache = require('./cache');
 var config = require('./config');
 var UserError = require('./error/UserError');
@@ -10,9 +11,6 @@ var UserError = require('./error/UserError');
 ////////
 
 var template = module.exports = {};
-
-var defaultExt = '.tpl.js';
-var defaultsDir = path.join('src', 'defaults');
 
 ////////
 
@@ -30,11 +28,12 @@ template.dependency = function (type) {
 
 function load(type, relativePath) {
 
-  var fileName = type + defaultExt;
+  var fileName = type + C.TEMPLATE_EXT;
+  var defaultsDir = path.join('src', 'defaults');
 
   var templatePath = path.join(defaultsDir, relativePath, fileName);
 
-  var usePath = cache.get('useConfig');
+  var usePath = cache.get(C.CACHE_USE_CONFIG_KEY);
   if (usePath) {
 
     var useDir = path.dirname(usePath);
