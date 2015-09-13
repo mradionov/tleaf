@@ -8,7 +8,10 @@ module.exports = function (config) {
       indent: '\t',
 
       // Include "use strict" statement to the top of the generated test file
-      useStrict: true
+      useStrict: true,
+
+      // Add commented examples of basic specs to the generated test file
+      includeSamples: true
     }
 
   });

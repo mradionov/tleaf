@@ -32,6 +32,8 @@ $ npm i tleaf -g
 
 ## Usage
 
+***
+
 ```bash
 $ tleaf SOURCE DEST
 ```
@@ -130,6 +132,19 @@ By default configuration file `tleaf.conf.js` contains only a few commonly used 
   };
   ```
 
+* `template.includeSamples: [bool]` - add commented examples of basic specs to a generated test file
+
+  ```js
+  module.exports = function (config) {
+    config.set({
+      template: {
+        includeSamples: true  // include
+        includeSamples: false // don't include
+      }
+    });
+  };
+  ```
+
 * `units.process: [array]` - array of unit types which should be parsed and processed. To reorder the appearance of unit types change their order in this array.
 
   ```js
@@ -192,7 +207,7 @@ By default configuration file `tleaf.conf.js` contains only a few commonly used 
 
 Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to be able to fill it with the gathered data.
 When you run the command `tleaf clone [DIRECTORY]`, all default templates and a configuration file are copied to the location you've provided.
-Most of the templates are based on [angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), a template for providers is based on [this StackOverflow Q/A](http://stackoverflow.com/questions/14771810/how-to-test-angularjs-custom-provider) and the rest of the templates are made by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates).
+Most of the templates are based on [yeoman/angular-generator](https://github.com/yeoman/generator-angular) and [daniellmb/angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), the rest of the templates are made by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates), they have pretty simple base setup, which might be enough in general.
 Templates are processed by the templating engine called [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
 
 ### Data available in templates

@@ -61,20 +61,15 @@ function generate(type, name, deps) {
   // load source of the generated test file
   var testSource = fs.readFileSync(testPath, 'utf8');
 
-  // find end of the suite
-  var target = '});';
-  var index = testSource.lastIndexOf(target);
-  if (index < 0) {
-    throw new Error('Bad test: unable to find injection index');
-  }
+  var modified = testSource;
 
-  var injection =
-    'it("should work for ' + type + '", function () {' +
-    ' expect(true).to.be.ok; ' +
-    '});';
+  // replace default jasmine matchers with mocha matchers
+  modified = modified.replace(/\.toEqual/g, '.to.equal');
+  modified = modified.replace(/\.toBe/g, '.to.equal');
 
-  var modifiedTestSource = testSource.substr(0, index) + injection +
-    testSource.substr(index, testSource.length);
+  // remove comment blocks
+  modified = modified.replace(/\/\*/, '');
+  modified = modified.replace(/\*\//, '');
 
-  fs.writeFileSync(testPath, modifiedTestSource, 'utf8');
+  fs.writeFileSync(testPath, modified, 'utf8');
 }

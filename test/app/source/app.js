@@ -26,18 +26,22 @@
   })
 
   .provider('MyProv', function () {
-    this.baz = function () {
-      return 'qux';
+    var bar = 'qux';
+    this.set = function (value) {
+      bar = value;
     };
-    this.$get = function () {
+    this.$get = function ($http, MyService) {
       return {
-        foo: 'bar'
+        foo: function () {
+          return bar;
+        }
       };
     };
   })
 
   .directive('myDir', function ($http, MyService) {
     return {
+      template: 'this is the myDir directive',
       foo: 'bar',
       baz: function () {
         return 'qux';
@@ -46,14 +50,12 @@
   })
 
   .filter('MyFilter', function () {
-    return function () {
-      return 'baz';
+    return function (value) {
+      return 'MyFilter filter: ' + value;
     };
   })
 
-  .value('MyValue', {
-    foo: 'bar'
-  })
+  .value('MyValue', 42)
 
   .constant('MyConstant', 42);
 

@@ -1,10 +1,12 @@
-{{>useStrict}}
+{{#if opts.useStrict}}
+'use strict';
+
+{{/if}}
 describe('Service: {{name}}', function () {
 
 	var {{name}}{{and arg.deps}};
 
 	beforeEach(function () {
-
 		module('{{module}}');
 
 		module(function ($provide) {
@@ -22,5 +24,16 @@ describe('Service: {{name}}', function () {
 	});
 
 	// Specs here
+	{{#if opts.includeSamples}}
+	/*
+	it('should return a property value', function () {
+		expect({{name}}.foo).toBe('bar');
+	});
+
+	it('should return a method value', function () {
+		expect({{name}}.baz()).toBe('qux');
+	});
+	*/
+	{{/if}}
 
 });

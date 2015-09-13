@@ -58,14 +58,6 @@ function registerPartials(env) {
     partials[name] = source;
   });
 
-  // Include it even if option is disabled, because partial is referenced
-  // in templates anyway, but you'll get an error for missing partial
-  // TODO: move it to file, if there will be more partials
-  partials['useStrict'] = '';
-  if (!!config.template.useStrict) {
-    partials['useStrict'] = "'use strict';\n\n";
-  }
-
   _.forEach(partials, function (source, name) {
     env.registerPartial(name, source);
   });

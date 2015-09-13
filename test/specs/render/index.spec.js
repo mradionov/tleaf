@@ -43,22 +43,4 @@ describe('render/index', function () {
 
   });
 
-  describe('use strict', function () {
-
-    it('should add statement if enabled in config', function () {
-      var source = '{{>useStrict}}';
-      configStub.template.useStrict = true;
-      var result = render(source);
-      assert.include(result, "'use strict';");
-    });
-
-    it('should not add statement if disabled in config', function () {
-      var source = '{{>useStrict}}';
-      configStub.template.useStrict = false;
-      var result = render(source);
-      assert.equal(result, '');
-    });
-
-  });
-
 });

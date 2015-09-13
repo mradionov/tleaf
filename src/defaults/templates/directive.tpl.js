@@ -1,28 +1,14 @@
-{{>useStrict}}
+{{#if opts.useStrict}}
+'use strict';
+
+{{/if}}
 describe('Directive: {{name}}', function () {
+
+	var template, element;
 	var $scope, $compile{{and arg.deps}};
-	var element, defaultData;
-	var validTemplate = '<{{dashCase name}} ng-model="data"></{{dashCase name}}>';
-
-	function createDirective(data, template) {
-		var elm;
-
-		$scope.data = data || defaultData;
-
-		elm = $compile(template || validTemplate)($scope);
-
-		// Trigger watchers
-		// $scope.$apply();
-
-		return elm;
-	}
 
 	beforeEach(function () {
-
 		module('{{module}}');
-
-		// Reset data each time
-		defaultData = 42;
 
 		module(function ($provide) {
 			{{#each deps}}
@@ -30,8 +16,8 @@ describe('Directive: {{name}}', function () {
 			{{/each}}
 		});
 
-		inject(function (_$rootScope_, _$compile_{{and arg._deps_ }}) {
-			$scope = _$rootScope_.$new();
+		inject(function ($rootScope, _$compile_{{and arg._deps_}}) {
+			$scope = $rootScope.$new();
 			$compile = _$compile_;
 			{{#each deps}}
 			{{this.name}} = _{{this.name}}_;
@@ -40,5 +26,14 @@ describe('Directive: {{name}}', function () {
 	});
 
 	// Specs here
+	{{#if opts.includeSamples}}
+	/*
+	it('should make a hidden element visible', inject(function ($compile) {
+		template = '<{{dashCase name}}></{{dashCase name}}>';
+		element = $compile(template)($scope);
+		expect(element.text()).toBe('this is the {{name}} directive');
+	}));
+	*/
+	{{/if}}
 
 });

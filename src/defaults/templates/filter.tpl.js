@@ -1,5 +1,9 @@
-{{>useStrict}}
+{{#if opts.useStrict}}
+'use strict';
+
+{{/if}}
 describe('Filter: {{name}}', function () {
+
 	var {{name}};
 
 	beforeEach(function () {
@@ -21,5 +25,13 @@ describe('Filter: {{name}}', function () {
 	});
 
 	// Specs here
+	{{#if opts.includeSamples}}
+	/*
+	it('should run the filter on a text', function () {
+		var text = 'foo';
+		expect({{name}}(text)).toBe('{{name}} filter: ' + text);
+	});
+	*/
+	{{/if}}
 
 });

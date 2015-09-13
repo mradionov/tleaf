@@ -1,4 +1,7 @@
-{{>useStrict}}
+{{#if opts.useStrict}}
+'use strict';
+
+{{/if}}
 describe('Value: {{name}}', function () {
 
 	var {{name}};
@@ -13,5 +16,12 @@ describe('Value: {{name}}', function () {
 	});
 
 	// Specs here
+	{{#if opts.includeSamples}}
+	/*
+	it('should return a value', function () {
+		expect({{name}}).toBe(42);
+	});
+	*/
+	{{/if}}
 
 });

@@ -1,4 +1,7 @@
-{{>useStrict}}
+{{#if opts.useStrict}}
+'use strict';
+
+{{/if}}
 describe('Controller: {{name}}', function () {
 
 	var $scope, {{name}}{{and arg.deps}};
@@ -27,5 +30,16 @@ describe('Controller: {{name}}', function () {
 	});
 
 	// Specs here
+	{{#if opts.includeSamples }}
+	/*
+	it('should return a property value', function () {
+		expect($scope.foo).toBe('bar');
+	});
+
+	it('should return a method value', function () {
+		expect($scope.baz()).toBe('qux');
+	});
+	*/
+	{{/if}}
 
 });
