@@ -7,7 +7,6 @@ var proxyquire = require('proxyquire');
 
 var resolvedConfig;
 var cacheStub = {};
-var fsStub = {};
 var defaultConfigStub = function (config) {
   config.set({
     foo: 'bar',
@@ -17,7 +16,7 @@ var defaultConfigStub = function (config) {
     }
   });
 };
-var cachedConfigStub = function (config) {
+var defaultCachedConfigStub = function (config) {
   config.set({
     foo: 'moo',
     boo: 'bar',
@@ -27,20 +26,25 @@ var cachedConfigStub = function (config) {
     }
   });
 };
-cachedConfigStub['@noCallThru'] = true;
 
 ////////
 
 describe('config/index', function () {
 
+  var cachedConfigStub;
+
   function load() {
     resolvedConfig = proxyquire('./../../../src/config', {
-      'fs-extra': fsStub,
       '../cache': cacheStub,
       './default': defaultConfigStub,
       '/cache/tleaf.conf.js': cachedConfigStub
     });
   }
+
+  beforeEach(function () {
+    cachedConfigStub = defaultCachedConfigStub;
+    cachedConfigStub['@noCallThru'] = true;
+  });
 
   it('should use default config when path in cache not set', function () {
     cacheStub.get = function () { return; }
@@ -56,7 +60,7 @@ describe('config/index', function () {
 
   it('should use default config when cache does not exist', function () {
     cacheStub.get = function () { return '/cache/tleaf.conf.js'; }
-    fsStub.existsSync = function () { return false; }
+    cachedConfigStub = function () { throw { code: 'MODULE_NOT_FOUND' } };
     load();
     assert.deepEqual(resolvedConfig, {
       foo: 'bar',
@@ -69,7 +73,6 @@ describe('config/index', function () {
 
   it('should merge in currenly used cached config with default', function () {
     cacheStub.get = function () { return '/cache/tleaf.conf.js'; }
-    fsStub.existsSync = function (path) { return true; }
     load();
     assert.deepEqual(resolvedConfig, {
       foo: 'moo',

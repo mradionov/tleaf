@@ -73,8 +73,13 @@ run.clone = function (clonePathArg) {
 run.use = function (usePathArg) {
   var usePath = path.resolve(usePathArg);
 
-  if (!fs.existsSync(usePath)) {
-    throw new UserError('Configuration file not found.');
+  var useConfig = _.noop;
+  try {
+    useConfig = require(usePath);
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      throw new UserError('Configuration file not found.');
+    }
   }
 
   cache.set(C.CACHE_USE_CONFIG_KEY, usePath);

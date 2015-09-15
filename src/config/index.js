@@ -1,9 +1,10 @@
 'use strict';
 
-var fs = require('fs-extra');
 var _ = require('lodash');
 
+var C = require('../constants');
 var cache = require('../cache');
+var log = require('../log');
 
 var defaultConfig = require('./default');
 
@@ -26,11 +27,21 @@ var config = {
 // call config module function providing config API
 defaultConfig(config);
 
-var useConfig = {};
 var useConfigPath = cache.get('useConfig');
-if (useConfigPath && fs.existsSync(useConfigPath)) {
-  // load custom config as module
-  useConfig = require(useConfigPath);
+if (useConfigPath) {
+
+  var useConfig = _.noop;
+
+  try {
+    // load custom config as module
+    useConfig = require(useConfigPath);
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      log.pref('Could not load cached config path. Switching to default config.');
+      cache.remove(C.CACHE_USE_CONFIG_KEY);
+    }
+  }
+
   // call user config module function providing config API
   useConfig(config);
 }

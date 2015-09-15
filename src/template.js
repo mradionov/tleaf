@@ -29,7 +29,7 @@ template.dependency = function (type) {
 function load(type, relativePath) {
 
   var fileName = type + C.TEMPLATE_EXT;
-  var defaultsDir = path.join('src', 'defaults');
+  var defaultsDir = path.join(__dirname, 'defaults');
 
   var templatePath = path.join(defaultsDir, relativePath, fileName);
 
