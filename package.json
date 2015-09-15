@@ -2,14 +2,15 @@
   "name": "tleaf",
   "version": "0.0.0",
   "description": "AngularJS unit test generator",
-  "main": "index.js",
   "author": "Michael Radionov (https://github.com/mradionov)",
   "license": "MIT",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/mradionov/tleaf"
   },
+  "main": "index.js",
+  "bin": "bin/tleaf",
+  "preferGlobal": true,
   "dependencies": {
     "escope": "^3.2.0",
     "esprima": "^2.4.0",
