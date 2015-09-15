@@ -90,7 +90,7 @@ ask.identifyDeps = function (deps, callback) {
       type: 'list',
       name: index.toString(),
       message: 'What is a type of "' + dep.name + '"?',
-      choices: config.units.process
+      choices: config.dependencies.process
     };
   });
 

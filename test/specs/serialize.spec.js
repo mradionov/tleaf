@@ -1,18 +1,18 @@
 'use strict';
 
 var assert = require('chai').assert;
+var _ = require('lodash');
 var proxyquire = require('proxyquire');
 
 var configStub = {
-  template: {},
-  units: {},
-  dependencies: {},
   '@noCallThru': true
 };
 
 var serialize = proxyquire('./../../src/serialize', {
   './config': configStub
 });
+
+////////
 
 describe('serialize', function () {
 
@@ -29,6 +29,11 @@ describe('serialize', function () {
         { name: 'TestFactory', type: 'factory' }
       ]
     };
+    _.extend(configStub, {
+      template: {},
+      units: {},
+      dependencies: {}
+    });
     data = serialize(unit);
   });
 

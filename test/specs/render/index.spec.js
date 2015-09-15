@@ -2,11 +2,9 @@
 
 var assert = require('chai').assert;
 var proxyquire = require('proxyquire');
+var _ = require('lodash');
 
 var configStub = {
-  template: {},
-  units: {},
-  dependencies: {},
   '@noCallThru': true
 };
 
@@ -17,6 +15,14 @@ var render = proxyquire('./../../../src/render', {
 ////////
 
 describe('render/index', function () {
+
+  beforeEach(function () {
+    _.extend(configStub, {
+      template: {},
+      units: {},
+      dependencies: {}
+    });
+  });
 
   describe('indent', function () {
 

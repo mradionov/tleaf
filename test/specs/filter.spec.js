@@ -2,10 +2,9 @@
 
 var assert = require('chai').assert;
 var proxyquire = require('proxyquire');
+var _ = require('lodash');
 
 var configStub = {
-  units: {},
-  dependencies: {},
   '@noCallThru': true
 };
 
@@ -27,6 +26,11 @@ describe('filter', function () {
         { name: 'MyDir', type: 'directive' }
       ]
     };
+    _.extend(configStub, {
+      template: {},
+      units: {},
+      dependencies: {}
+    });
   });
 
   it('should move all deps to unknown', function () {

@@ -5,12 +5,8 @@ var sinon = require('sinon');
 var _ = require('lodash');
 var proxyquire = require('proxyquire');
 
-proxyquire.noPreserveCache();
-
 var inquirerStub = {};
 var configStub = {
-  units: {},
-  dependencies: {},
   '@noCallThru': true
 };
 
@@ -19,7 +15,17 @@ var ask = proxyquire('../../src/ask', {
   './config': configStub
 });
 
+////////
+
 describe('ask', function () {
+
+  beforeEach(function () {
+    _.extend(configStub, {
+      template: {},
+      units: {},
+      dependencies: {}
+    });
+  });
 
   describe('createUnit', function () {
 
@@ -139,9 +145,9 @@ describe('ask', function () {
       });
     });
 
-    it('should list processed units from config', function () {
+    it('should list processed dependencies from config', function () {
       inquirerStub.prompt = sinon.spy();
-      configStub.units.process = ['foo', 'bar', 'baz'];
+      configStub.dependencies.process = ['foo', 'bar', 'baz'];
       ask.identifyDeps([
         { name: 'TestFactory' },
         { name: 'TestService' },

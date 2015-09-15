@@ -1,13 +1,12 @@
 'use strict';
 
 var assert = require('chai').assert;
+var _ = require('lodash');
 var proxyquire = require('proxyquire');
 
 var fsStub = {};
 var cacheStub = {};
 var configStub = {
-  units: {},
-  dependencies: { templateMap: {} },
   '@noCallThru': true
 };
 
@@ -18,6 +17,14 @@ var template = proxyquire('./../../src/template', {
 });
 
 describe('template', function () {
+
+  beforeEach(function () {
+    _.extend(configStub, {
+      template: {},
+      units: {},
+      dependencies: { templateMap: {} }
+    });
+  });
 
   describe('when there is no cached config', function () {
 
