@@ -5,6 +5,8 @@ tleaf
 
 Command line [npm](https://www.npmjs.com/) utility tool built on [Node.js](https://nodejs.org/) to generate [AngularJS](https://angularjs.org/) unit tests based on existing code or create them from scratch.
 
+![screencast](screencast.gif)
+
 #### Contents:
 
   * [How does it work?](#how-does-it-work)
@@ -18,7 +20,7 @@ Command line [npm](https://www.npmjs.com/) utility tool built on [Node.js](https
 
 ## How does it work?
 
-It takes your AngularJS source file and parses it with the help of [esprima](http://esprima.org/) - standard-compliant ECMAScript parser, which results into a code syntax tree. Then this it analyzes the tree, looks for AngularJS units and extracts infromation about them. It may ask you some questions to get some more information. Then it generates a test file, based on pre-defined templates, setting up the collected information as a unit test.
+It takes your AngularJS source file and parses it with the help of [esprima](http://esprima.org/) - standard-compliant ECMAScript parser, which results into a code syntax tree. The tree is being analyzed for AngularJS units and based on that information it generates a test file from pre-defined templates, setting up the collected data for unit tests.
 
 *Note: source code can be very different and complex from project to project (and from person to person), so it's really difficult to cover all cases and styles of writing AngularJS applications to be able to extract required information. If your AngularJS source code is not getting parsed as expected, feel free to create an issue with an example of the source code causing the problem or PR a test reproducing it.*
 
@@ -41,7 +43,7 @@ $ tleaf SOURCE DEST
 * `SOURCE` - path to AngularJS source code with a unit to test
 * `DEST` - path to output test file
 
-The command parses your source file and extracts all AngularJS units. After that you will be asked which one you'd want to test. The result will be a test file generated based on template for this unit type.
+The command parses your source file and extracts all AngularJS units. After that you will be asked which one you'd want to test and also to identify the dependencies. The result will be a test file generated based on a template for this unit type.
 
 ***
 
@@ -51,7 +53,7 @@ $ tleaf create DEST
 
 * `DEST` - path to output test file
 
-The command creates a test file based on answers you provide for a number of questions: what is a name of the unit? what is a type of the unit? what are unit's dependencies? The result will be a test file generated based on template for this unit type.
+The command creates a test file based on answers you provide for a number of questions: *What is a name of the unit?* *What is a type of the unit?* *What are unit's dependencies?* The result will be a test file generated based on a template for this unit type.
 
 ***
 
@@ -71,7 +73,7 @@ $ tleaf clone [DIRECTORY]
 
 * `[DIRECTORY]` - *(optional)* path to output folder
 
-The command copies default templates to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. That folder will also contain a configuration file for additional options called `tleaf.conf.js`. This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be included under version control system, but it is not required at all, it's up to you.
+The command copies default templates to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be included under version control system, but it is not required at all, it's up to you.
 
 ***
 
@@ -81,12 +83,12 @@ $ tleaf use CONFIG
 
 * `CONFIG` - path to configuration file
 
-The command sets current configuration which will be used to generate test files. It accepts a path to a configuration file created by executing a command `tleaf init [DIRECTORY]` or a configuration file inside a folder, which was created by executing a command `tleaf clone [DIRECTORY]`. This command allows you to use different configurations and set of templates.
+The command sets current configuration which will be used to generate test files. It accepts a path to a configuration file created by executing a command `tleaf init [DIRECTORY]` or a configuration file inside a folder, which was created by executing a command `tleaf clone [DIRECTORY]`. It assumes that custom templates are in the same folder with the configuration file following the same structure, when you cloned them with `tleaf clone [DIRECTORY]`. The command allows you to use different configurations and set of templates.
 
 ***
 
 ```bash
-$ tleaf use default
+$ tleaf default
 ```
 
   The command allows to switch back to default config and templates.
@@ -103,7 +105,7 @@ $ tleaf current
 
 ## Configuration
 
-By default configuration file `tleaf.conf.js` contains only a few commonly used options, [see default configuration file](src/config/default.js) for a complete reference. Your configuration will be merged on top of the default configuration. Available options:
+By default [configuration file](src/defaults/tleaf.conf.js) contains only a few commonly used options, [see default configuration file](src/config/default.js) for a complete reference. Your configuration will be merged with the default configuration, arrays will be overriden by your values. Available options:
 
 * `template.indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces to replace one tab.
 
@@ -119,7 +121,7 @@ By default configuration file `tleaf.conf.js` contains only a few commonly used 
     });
   };
   ```
-* `template.useStrict: [bool]` - include `'use strict';` to the top of the generated test file
+* `template.useStrict: [bool]` - include `'use strict';` to the top of the default generated test file
 
   ```js
   module.exports = function (config) {
@@ -132,7 +134,7 @@ By default configuration file `tleaf.conf.js` contains only a few commonly used 
   };
   ```
 
-* `template.includeSamples: [bool]` - add commented examples of basic specs to a generated test file
+* `template.includeSamples: [bool]` - add commented examples of basic specs to the default generated test file
 
   ```js
   module.exports = function (config) {
@@ -174,7 +176,7 @@ By default configuration file `tleaf.conf.js` contains only a few commonly used 
   };
   ```
 
-* `dependencies.filter: [array]` - array of dependency names, which should be ignored, by default only `$scope` is filtered out.
+* `dependencies.filter: [array]` - array of dependency names, which should be ignored, by default only `$scope` is excluded.
 
   ```js
   module.exports = function (config) {
@@ -187,7 +189,7 @@ By default configuration file `tleaf.conf.js` contains only a few commonly used 
   };
   ```
 
-* `dependencies.templateMap: [object]` - object, which maps dependency types with templates they should use. May be useful, when you want to render *factories* or *services* using *value* template.
+* `dependencies.templateMap: [object]` - object, which maps dependency types with templates they should use. May be useful, for example, when you want to render *factories* or *services* using *value* template.
 
   ```js
   module.exports = function (config) {
@@ -207,8 +209,8 @@ By default configuration file `tleaf.conf.js` contains only a few commonly used 
 
 Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to be able to fill it with the gathered data.
 When you run the command `tleaf clone [DIRECTORY]`, all default templates and a configuration file are copied to the location you've provided.
-Most of the templates are based on [yeoman/angular-generator](https://github.com/yeoman/generator-angular) and [daniellmb/angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), the rest of the templates are made by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates), they have pretty simple base setup, which might be enough in general.
-Templates are processed by the templating engine called [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
+Most of the templates are based on [yeoman/angular-generator](https://github.com/yeoman/generator-angular) and [daniellmb/angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), the rest of the templates are made by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates), they have pretty simple base setup, which might be enough for general use.
+Templates are processed by the templating engine [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
 
 ### Data available in templates
 
@@ -285,6 +287,17 @@ Information, which is being collected by a parser or from your answers, gets pas
 
     // shortcut for unit names; useful in provide() section
     _deps_: ['_$http_', '_UserService_', '_API_KEY_']
+
+  },
+
+  // top level
+
+  // references to config values
+  opts: {
+
+    useStrict: true,
+
+    includeTemplates: true
 
   }
 
