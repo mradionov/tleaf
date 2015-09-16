@@ -85,6 +85,11 @@ ask.pickUnit = function (units, callback) {
 
 
 ask.identifyDeps = function (deps, callback) {
+
+  if (!config.dependencies.process.length) {
+    return callback([]);
+  }
+
   var questions = deps.map(function (dep, index) {
     return {
       type: 'list',
@@ -111,6 +116,10 @@ ask.identifyDeps = function (deps, callback) {
 
 
 function addUnitDependency(deps, callback) {
+
+  if (!config.dependencies.process.length) {
+    return callback();
+  }
 
   var questions = [
     {

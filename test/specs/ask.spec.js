@@ -23,7 +23,9 @@ describe('ask', function () {
     _.extend(configStub, {
       template: {},
       units: {},
-      dependencies: {}
+      dependencies: {
+        process: ['factory', 'service', 'provider', 'value', 'constant']
+      }
     });
   });
 
@@ -105,6 +107,22 @@ describe('ask', function () {
       assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
     });
 
+    it('should not even ask if config option empty', function () {
+      inquirerStub.prompt = function (questions, respond) {
+        inquirerStub.prompt = sinon.spy();
+        respond({
+          name: 'TestCtrl',
+          type: 'controller',
+          module: 'test'
+        });
+      };
+      configStub.dependencies.process = [];
+      ask.createUnit(function (unit) {
+        assert.deepEqual(unit.deps, []);
+      });
+      assert.notOk(inquirerStub.prompt.called);
+    });
+
   });
 
   describe('pickUnit', function () {
@@ -156,6 +174,19 @@ describe('ask', function () {
       var questions = inquirerStub.prompt.getCall(0).args[0];
       var question = questions[0];
       assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
+    });
+
+    it('should not even ask if config option empty', function () {
+      inquirerStub.prompt = sinon.spy();
+      configStub.dependencies.process = [];
+      ask.identifyDeps([
+        { name: 'TestFactory' },
+        { name: 'TestService' },
+        { name: 'TestProvider' }
+      ], function (identified) {
+        assert.deepEqual(identified, []);
+      });
+      assert.notOk(inquirerStub.prompt.called);
     });
 
   });
