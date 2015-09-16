@@ -1,6 +1,6 @@
 {
   "name": "tleaf",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "AngularJS unit test generator",
   "author": "Michael Radionov (https://github.com/mradionov)",
   "license": "MIT",
