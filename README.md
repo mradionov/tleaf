@@ -63,7 +63,7 @@ $ tleaf init [DIRECTORY]
 
 * `[DIRECTORY]` - *(optional)* path to output folder
 
-The command copies a configuration file to a directory you've provided.
+The command copies a configuration file to a directory you've provided. If directory is not specified, the configuration file will be copied to a current directory.
 
 ***
 
@@ -73,7 +73,7 @@ $ tleaf clone [DIRECTORY]
 
 * `[DIRECTORY]` - *(optional)* path to output folder
 
-The command copies default templates to a directory you've provided. You'll be able to modify these templates for your needs and use them to generate test files. This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects. It can be included under version control system, but it is not required at all, it's up to you.
+The command copies default templates to a directory you've provided. If directory is not specified, the folder will be created in a current directory. As a result you'll be able to modify copied templates for your needs and requirements and use them instead of default templates to generate test files (see more in [Custom templates](#custom-templates)). This folder can be initialized anywhere on your machine, you can use the same configuration and set of templates for multiple projects (see commands below to switch between configurations). It can be included under version control system, but it is not required at all, it's up to you.
 
 ***
 
@@ -83,7 +83,7 @@ $ tleaf use CONFIG
 
 * `CONFIG` - path to configuration file
 
-The command sets current configuration which will be used to generate test files. It accepts a path to a configuration file created by executing a command `tleaf init [DIRECTORY]` or a configuration file inside a folder, which was created by executing a command `tleaf clone [DIRECTORY]`. It assumes that custom templates are in the same folder with the configuration file following the same structure, when you cloned them with `tleaf clone [DIRECTORY]`. The command allows you to use different configurations and set of templates.
+The command sets current configuration which will be used to generate test files. It accepts a path to a configuration file created by executing a command `tleaf init [DIRECTORY]` or a configuration file inside a folder, which was created by executing a command `tleaf clone [DIRECTORY]`. It assumes that custom templates are in the same folder with the configuration file, following the same structure when you cloned them with `tleaf clone [DIRECTORY]`. The command allows you to switch between different configurations and set of templates.
 
 ***
 
@@ -91,7 +91,7 @@ The command sets current configuration which will be used to generate test files
 $ tleaf default
 ```
 
-  The command allows to switch back to default config and templates.
+  The command allows to switch back to the default configuration and set of templates.
 
 ***
 
@@ -99,13 +99,13 @@ $ tleaf default
 $ tleaf current
 ```
 
-  The command shows which configuration is used at the moment.
+  The command shows what configuration is used at the moment.
 
 ***
 
 ## Configuration
 
-By default [configuration file](src/defaults/tleaf.conf.js) contains only a few commonly used options, [see default configuration file](src/config/default.js) for a complete reference. Your configuration will be merged with the default configuration, arrays will be overriden by your values. Available options:
+[Default configuration file](src/defaults/tleaf.conf.js) contains only a few commonly used options ([see the complete configuration](src/config/default.js)). Your configuration will be merged with the default complete configuration, arrays will be overriden by your values (not merged). Available options:
 
 * `template.indent: [string|integer]` - sets indentation for templates. Tabs by default (`'\t'`). A string will replace one tab. An integer will be a number of spaces to replace one tab.
 
@@ -121,7 +121,7 @@ By default [configuration file](src/defaults/tleaf.conf.js) contains only a few 
     });
   };
   ```
-* `template.useStrict: [bool]` - include `'use strict';` to the top of the default generated test file
+* `template.useStrict: [bool]` - include `'use strict';` to the top of a generated test file.
 
   ```js
   module.exports = function (config) {
@@ -134,7 +134,7 @@ By default [configuration file](src/defaults/tleaf.conf.js) contains only a few 
   };
   ```
 
-* `template.includeSamples: [bool]` - add commented examples of basic specs to the default generated test file
+* `template.includeSamples: [bool]` - add commented examples of basic specs to a generated test file.
 
   ```js
   module.exports = function (config) {
@@ -147,7 +147,7 @@ By default [configuration file](src/defaults/tleaf.conf.js) contains only a few 
   };
   ```
 
-* `units.process: [array]` - array of unit types which should be parsed and processed. To reorder the appearance of unit types change their order in this array.
+* `units.process: [array]` - array of unit types which should be parsed and processed. To reorder the appearance of unit types change their order in this array. See the [complete configuration](src/config/default.js#L22) for all possible options.
 
   ```js
   module.exports = function (config) {
@@ -161,7 +161,7 @@ By default [configuration file](src/defaults/tleaf.conf.js) contains only a few 
   };
   ```
 
-* `dependencies.process: [array]` - array of dependency types which should be parsed and processed. To reorder the appearance of dependency types change their order in this array.
+* `dependencies.process: [array]` - array of dependency types which should be parsed and processed. To reorder the appearance of dependency types change their order in this array. See the [complete configuration](src/config/default.js#L34) for all possible options.
 
   ```js
   module.exports = function (config) {
@@ -176,7 +176,7 @@ By default [configuration file](src/defaults/tleaf.conf.js) contains only a few 
   };
   ```
 
-* `dependencies.filter: [array]` - array of dependency names, which should be ignored, by default only `$scope` is excluded.
+* `dependencies.filter: [array]` - array of dependency names, which should be ignored, by default only `$scope` is excluded. If you override this value make sure to include `$scope` too (if you need it to be exluded).
 
   ```js
   module.exports = function (config) {
@@ -189,7 +189,7 @@ By default [configuration file](src/defaults/tleaf.conf.js) contains only a few 
   };
   ```
 
-* `dependencies.templateMap: [object]` - object, which maps dependency types with templates they should use. May be useful, for example, when you want to render *factories* or *services* using *value* template.
+* `dependencies.templateMap: [object]` - object, which maps dependency types with templates they should use. May be useful, for example, when you want to render *factories* or *services* using *value* template. See the [complete configuration](src/config/default.js#L42) for all possible options.
 
   ```js
   module.exports = function (config) {
@@ -209,12 +209,12 @@ By default [configuration file](src/defaults/tleaf.conf.js) contains only a few 
 
 Test files are generated from the templates, which are kinda JavaScript files, but they get processed like templates to be able to fill it with the gathered data.
 When you run the command `tleaf clone [DIRECTORY]`, all default templates and a configuration file are copied to the location you've provided.
-Most of the templates are based on [yeoman/angular-generator](https://github.com/yeoman/generator-angular) and [daniellmb/angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), the rest of the templates are made by taking already existing ones as an example. You can take a look at [default templates](src/defaults/templates), they have pretty simple base setup, which might be enough for general use.
+Most of the templates are based on [yeoman/angular-generator](https://github.com/yeoman/generator-angular) and [daniellmb/angular-test-patterns](https://github.com/daniellmb/angular-test-patterns), the rest of the templates are made by taking already existing ones as an example. You can take a look at the [default templates](src/defaults/templates), they have pretty simple base setup, which might be enough for general use.
 Templates are processed by the templating engine [Handlebars](http://handlebarsjs.com/), so you can use any of it's features.
 
 ### Data available in templates
 
-Information, which is being collected by a parser or from your answers, gets passed to templates. Here is the structure of the data available in templates, consider it a global object in your templates (taking some controller as an example):
+Information, which is being collected by a parser or from your answers, gets passed to the templates. Here is a structure of the data available in the templates, consider it a global object in your templates (taking some controller as an example):
 
 ```js
 
@@ -279,7 +279,7 @@ Information, which is being collected by a parser or from your answers, gets pas
 
   // top level
 
-  // args are usually used to define variables or arguments
+  // args are usually used to render variables or arguments
   arg: {
 
     // shortcut for unit names
@@ -306,7 +306,7 @@ Information, which is being collected by a parser or from your answers, gets pas
 
 ### Examples
 
-Here you can find some examples of composing the templates. You can discover more use-cases by looking at [default templates](src/defaults/templates).
+Here you can find some examples of composing the templates. You can discover more use-cases by looking at the [default templates](src/defaults/templates).
 
 1. Load module:
 
@@ -314,11 +314,13 @@ Here you can find some examples of composing the templates. You can discover mor
 
   ```js
   module('{{module}}');
+  module('{{unit.module.name}}')
   ```
 
   After render:
 
   ```js
+  module('admin');
   module('admin');
   ```
 
@@ -328,12 +330,14 @@ Here you can find some examples of composing the templates. You can discover mor
 
   ```js
   var {{name}}{{and arg.deps}};
+  var {{only arg.deps}};
   ```
 
   After render:
 
   ```js
   var UserController, $http, UserService, API_KEY;
+  var $http, UserService, API_KEY;
   ```
 
 3. Provide dependencies:
@@ -365,7 +369,7 @@ Here you can find some examples of composing the templates. You can discover mor
 
 ### Extra helpers
 
-Handlerbars allows to create custom helpers to help render the data, here are some of them built-in in the module, which might be helpful:
+Handlerbars allows to create custom helpers to help render the data. Here are the ones built-in in the module:
 
 * `{{only array}}` - joins array of strings with `", "`:
 
