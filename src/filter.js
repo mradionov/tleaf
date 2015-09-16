@@ -10,7 +10,6 @@ module.exports = filter;
 
 ////////
 
-// TODO: cache identified deps for respective project
 function filter(all) {
 
   var deps = {

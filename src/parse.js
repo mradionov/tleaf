@@ -66,8 +66,6 @@ function parse(source) {
 
   _.forEach(calls, function (call) {
     // for now use only completely parsed units
-    // TODO: ask user for information when parsing in real-time
-    //       if unable to parse it automatically
     var name = findName(call.node, call.scope);
     if (_.isUndefined(name)) { return; }
 
@@ -119,7 +117,6 @@ function findType(callExpression) {
 }
 
 
-// TODO: is "module" a reserved word in node.js? is it safe to use? if scoped?
 // TODO: multiple variable definitions
 function findModule(callExpression, scope) {
   var module = {};

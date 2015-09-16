@@ -11,7 +11,6 @@ module.exports = serialize;
 ////////
 
 
-// TODO: decide whether should recreate unit if it is bad or throw errors
 function serialize(unit) {
 
   var data = {

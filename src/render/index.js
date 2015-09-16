@@ -14,7 +14,6 @@ module.exports = render;
 
 ////////
 
-// TODO: support coffee templates
 function render(source, data) {
   var env = handlebars.create();
 
@@ -42,7 +41,6 @@ function render(source, data) {
 ////////
 
 
-// TODO: allow custom helpers in config
 function registerHelpers(env) {
   _.forEach(helpers, function (fn, name) {
     env.registerHelper(name, fn);
