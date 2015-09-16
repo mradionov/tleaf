@@ -18,8 +18,6 @@ var tmp;
 
 ////////
 
-// TODO: namespace keys depending on node installation?
-
 cache.set = function (path, value) {
   var data = load();
   _.set(data, path, value);

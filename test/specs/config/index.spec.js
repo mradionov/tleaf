@@ -13,6 +13,9 @@ var defaultConfigStub = function (config) {
     baz: {
       qux: [7, 1, 2, 3],
       doo: false
+    },
+    units: {
+      process: ['yo', 'sw']
     }
   });
 };
@@ -54,6 +57,9 @@ describe('config/index', function () {
       baz: {
         qux: [7, 1, 2, 3],
         doo: false
+      },
+      units: {
+        process: ['yo', 'sw']
       }
     });
   });
@@ -67,6 +73,9 @@ describe('config/index', function () {
       baz: {
         qux: [7, 1, 2, 3],
         doo: false
+      },
+      units: {
+        process: ['yo', 'sw']
       }
     });
   });
@@ -81,8 +90,21 @@ describe('config/index', function () {
         qux: [4, 5, 9],
         doo: false,
         woo: true
+      },
+      units: {
+        process: ['yo', 'sw']
       }
     });
+  });
+
+  it('should throw an error if units.process is empty', function () {
+    cacheStub.get = function () { return '/cache/tleaf.conf.js'; }
+    cachedConfigStub = function (config) {
+      config.set({ units: { process: [] } });
+    };
+    cachedConfigStub['@noCallThru'] = true;
+    var fn = function () { load(); };
+    assert.throw(fn);
   });
 
 });
