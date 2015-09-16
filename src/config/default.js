@@ -31,7 +31,7 @@ module.exports = function (config) {
       // List the dependencies which should be processed. Only the
       // types mentioned here will be included in generated test code.
       // The order they appear can be changed by reordering these keys.
-      process: ['provider', 'service', 'factory', 'value', 'constant'],
+      process: ['factory', 'service', 'provider', 'value', 'constant'],
 
       // Exclude particular dependencies, there won't be any test code generated
       // for them.
@@ -40,9 +40,9 @@ module.exports = function (config) {
       // Map dependency type to a respective template. Can be helpful in case
       // when one wants to stub services and factories with values.
       templateMap: {
-        'provider': 'provider',
-        'service': 'service',
         'factory': 'factory',
+        'service': 'service',
+        'provider': 'provider',
         'value': 'value',
         'constant': 'constant'
       }
