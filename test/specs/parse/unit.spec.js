@@ -115,6 +115,22 @@ describe('parse/unit', function () {
     }]);
   });
 
+  it('should extract component', function () {
+    var source =
+    "angular" +
+    " .module('test', [])" +
+    " .component('TestComponent', {});";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'component',
+      name: 'TestComponent',
+      module: { name: 'test' },
+      deps: []
+    }]);
+  });
+
   it('should extract a service', function () {
     var source =
     "angular.module('test', [])" +

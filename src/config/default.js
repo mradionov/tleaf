@@ -20,7 +20,7 @@ module.exports = function (config) {
       // here will be parsed and asked about.
       // The order they appear can be changed by reordering these keys.
       process: [
-        'controller', 'directive', 'factory', 'service',
+        'controller', 'directive', 'factory', 'service', 'component',
         'filter', 'provider', 'value', 'constant'
       ]
 

@@ -163,6 +163,12 @@ function findDeps(callExpression, scope, type) {
   var depsArg = _.get(callExpression, 'arguments[1]', {});
   var deps = [];
 
+  // component differs in a way that an object is used to describe it
+  // when other unit types use functions for instantiation
+  if (type === 'component') {
+    return findComponentDeps(depsArg, scope);
+  }
+
   // deps can be provided explicitly as an array
   // in this case a body of the unit is the last array element
   if (depsArg.type === 'ArrayExpression') {
@@ -191,6 +197,21 @@ function findDeps(callExpression, scope, type) {
   }
 
   return deps;
+}
+
+
+function findComponentDeps(object, scope) {
+  // covers { controller: someVar }
+  if (object.type === 'Identifier') {
+    object = _.get(findVariable(object.name, scope), 'init', {});
+  }
+
+  // if not object - not sure what to do with it
+  if (object.type !== 'ObjectExpression') {
+    return [];
+  }
+
+  return extractObjectPropertyDeps(object, 'controller', scope);
 }
 
 

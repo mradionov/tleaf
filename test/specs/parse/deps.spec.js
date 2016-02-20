@@ -180,4 +180,91 @@ describe('parse/deps', function () {
     }]);
   });
 
+  it('should extract deps for inline component and inline controller',
+     function () {
+    var source =
+    "angular" +
+    " .module('test', [])" +
+    " .component('TestComponent', {" +
+    "   controller: function ($scope) {}" +
+    " });";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'component',
+      name: 'TestComponent',
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
+    }]);
+  });
+
+  it('should extract deps for inline component and controller as fn declaration',
+     function () {
+    var source =
+    "angular" +
+    " .module('test', [])" +
+    " .component('TestComponent', {" +
+    "   controller: TestController" +
+    " });" +
+    "function TestController($scope) {}";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'component',
+      name: 'TestComponent',
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
+    }]);
+  });
+
+  it('should extract deps for inline component and controller as fn expression',
+     function () {
+    var source =
+    "angular" +
+    " .module('test', [])" +
+    " .component('TestComponent', {" +
+    "   controller: TestController" +
+    " });" +
+    "var TestController = function ($scope) {};";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'component',
+      name: 'TestComponent',
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
+    }]);
+  });
+
+  it('should extract deps for component as variable and inline controller',
+     function () {
+    var source =
+    "var TestComponent = {" +
+    " controller: function ($scope) {}" +
+    "};" +
+    "angular.module('test', []).component('TestComponent', TestComponent);";
+
+    var units = parse(source);
+
+    assert.deepEqual(units, [{
+      type: 'component',
+      name: 'TestComponent',
+      module: { name: 'test' },
+      deps: [{ name: '$scope' }]
+    }]);
+  });
+
+  it('should extract deps for component as variable and controller as fn',
+     function () {
+    var source =
+    "var TestController = function ($scope) {};" +
+    "var TestComponent = {" +
+    " controller: TestController" +
+    "};" +
+    "angular.module('test', []) .component('TestComponent', TestComponent);";
+  });
+
 });
