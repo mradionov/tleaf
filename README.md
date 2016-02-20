@@ -390,3 +390,8 @@ Handlerbars allows to create custom helpers to help render the data. Here are th
   ```
 
 * `{{defaults value defaultValue}}` - renders *value* if it is not *undefined*, *defaultValue* otherwise.
+
+## Changelog
+
+- 0.2.0 - Support for Angular 1.5 components
+- 0.1.0 - Initial
