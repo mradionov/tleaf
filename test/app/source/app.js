@@ -49,6 +49,17 @@
     };
   })
 
+  .component('myComp', {
+    controller: function ($http, MyService) {
+      var ctrl = this;
+
+      ctrl.foo = 'bar';
+      ctrl.baz = function () {
+        return 'qux';
+      };
+    }
+  })
+
   .filter('MyFilter', function () {
     return function (value) {
       return 'MyFilter filter: ' + value;
