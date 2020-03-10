@@ -32,11 +32,11 @@ describe('ask', function () {
   describe('createUnit', function () {
 
     it('should create unit without dependencies', function () {
-      inquirerStub.prompt = function (questions, respond) {
-        inquirerStub.prompt = function (questions, respond) {
-          respond({ name: '' });
+      inquirerStub.prompt = function (questions) {
+        inquirerStub.prompt = function (questions) {
+          return Promise.resolve({ name: '' });
         };
-        respond({
+        return Promise.resolve({
           name: 'TestCtrl',
           type: 'controller',
           module: 'test'
@@ -53,17 +53,17 @@ describe('ask', function () {
     });
 
     it('should create unit with dependencies', function () {
-      inquirerStub.prompt = function (questions, respond) {
-        inquirerStub.prompt = function (questions, respond) {
-          inquirerStub.prompt = function (questions, respond) {
-            respond({ name: '' });
+      inquirerStub.prompt = function (questions) {
+        inquirerStub.prompt = function (questions) {
+          inquirerStub.prompt = function (questions) {
+            return Promise.resolve({ name: '' });
           };
-          respond({
+          return Promise.resolve({
             name: 'TestFactory',
             type: 'factory'
           });
         };
-        respond({
+        return Promise.resolve({
           name: 'TestCtrl',
           type: 'controller',
           module: 'test'
@@ -83,7 +83,7 @@ describe('ask', function () {
     });
 
     it('should list processed units from config', function () {
-      inquirerStub.prompt = sinon.spy();
+      inquirerStub.prompt = sinon.stub().returns(Promise.resolve());
       configStub.units.process = ['foo', 'bar', 'baz'];
       ask.createUnit(_.noop);
       var questions = inquirerStub.prompt.getCall(0).args[0];
@@ -91,26 +91,27 @@ describe('ask', function () {
       assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
     });
 
-    it('should list processed dependencies from config', function () {
-      inquirerStub.prompt = function (questions, respond) {
-        inquirerStub.prompt = sinon.spy();
-        respond({
+    it.only('should list processed dependencies from config', function () {
+      inquirerStub.prompt = function (questions) {
+        inquirerStub.prompt = sinon.stub().returns(Promise.resolve({}));
+        return Promise.resolve({
           name: 'TestCtrl',
           type: 'controller',
           module: 'test'
         });
       };
       configStub.dependencies.process = ['foo', 'bar', 'baz'];
-      ask.createUnit(_.noop);
-      var questions = inquirerStub.prompt.getCall(0).args[0];
-      var question = _.find(questions, { name: 'type' });
-      assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
+      ask.createUnit(function () {
+        var questions = inquirerStub.prompt.getCall(0).args[0];
+        var question = _.find(questions, { name: 'type' });
+        assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
+      });
     });
 
     it('should not even ask if config option empty', function () {
-      inquirerStub.prompt = function (questions, respond) {
+      inquirerStub.prompt = function (questions) {
         inquirerStub.prompt = sinon.spy();
-        respond({
+        return Promise.resolve({
           name: 'TestCtrl',
           type: 'controller',
           module: 'test'
@@ -128,8 +129,8 @@ describe('ask', function () {
   describe('pickUnit', function () {
 
     it('should pick a unit', function () {
-      inquirerStub.prompt = function (question, respond) {
-        respond({ unit: 1 });
+      inquirerStub.prompt = function (question) {
+        return Promise.resolve({ unit: 1 });
       };
       ask.pickUnit([
         { name: 'TestFactory', type: 'factory', module: { name: 'test' } },
@@ -147,8 +148,8 @@ describe('ask', function () {
   describe('identifyDeps', function () {
 
     it('should identify deps', function () {
-      inquirerStub.prompt = function (question, respond) {
-        respond({ '0': 'factory', '1': 'service', '2': 'provider' });
+      inquirerStub.prompt = function (question) {
+        return Promise.resolve({ '0': 'factory', '1': 'service', '2': 'provider' });
       };
       ask.identifyDeps([
         { name: 'TestFactory' },
@@ -164,7 +165,7 @@ describe('ask', function () {
     });
 
     it('should list processed dependencies from config', function () {
-      inquirerStub.prompt = sinon.spy();
+      inquirerStub.prompt = sinon.stub().returns(Promise.resolve());
       configStub.dependencies.process = ['foo', 'bar', 'baz'];
       ask.identifyDeps([
         { name: 'TestFactory' },
