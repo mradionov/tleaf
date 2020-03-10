@@ -16,7 +16,7 @@ var resolvedConfig = {};
 // create API for config module
 var config = {
   set: function (options) {
-    _.merge(resolvedConfig, options, function (a, b) {
+    _.mergeWith(resolvedConfig, options, function (a, b) {
       // do not merge arrays, but replace
       if (_.isArray(a) && _.isArray(b)) {
         return b;

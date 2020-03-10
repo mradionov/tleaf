@@ -87,7 +87,7 @@ describe('ask', function () {
       configStub.units.process = ['foo', 'bar', 'baz'];
       ask.createUnit(_.noop);
       var questions = inquirerStub.prompt.getCall(0).args[0];
-      var question = _.findWhere(questions, { name: 'type' });
+      var question = _.find(questions, { name: 'type' });
       assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
     });
 
@@ -103,7 +103,7 @@ describe('ask', function () {
       configStub.dependencies.process = ['foo', 'bar', 'baz'];
       ask.createUnit(_.noop);
       var questions = inquirerStub.prompt.getCall(0).args[0];
-      var question = _.findWhere(questions, { name: 'type' });
+      var question = _.find(questions, { name: 'type' });
       assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
     });
 

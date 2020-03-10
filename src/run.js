@@ -128,7 +128,7 @@ run.parse = function (sourcePathArg, outputPathArg) {
   var units = parse(source);
 
   var processedUnits = units.filter(function (unit) {
-    return _.contains(config.units.process, unit.type);
+    return _.includes(config.units.process, unit.type);
   });
 
   if (!processedUnits.length) {

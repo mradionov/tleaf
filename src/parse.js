@@ -38,7 +38,7 @@ function parse(source) {
 
         var calleeProp = _.get(node, 'callee.property', {});
 
-        if (_.contains(config.units.process, calleeProp.name)) {
+        if (_.includes(config.units.process, calleeProp.name)) {
           // save matching node with an appropriate scope
           calls.push({
             node: node,
@@ -79,7 +79,7 @@ function parse(source) {
 
     // Angular should not allow having circular dependency, but if
     // there is any in a source code, do not continue execution
-    if (_.findWhere(deps, { name: name })) {
+    if (_.find(deps, { name: name })) {
       throw new UserError('Circular dependency for ' + type + ' "' + name + '".');
     }
 
@@ -135,7 +135,7 @@ function findModule(callExpression, scope) {
       module.name = _.get(callExpression, 'arguments[0].value');
 
     // or module can be stored in variable; find this variable then
-    } else if (_.contains(config.units.process, calleeProp.name)) {
+    } else if (_.includes(config.units.process, calleeProp.name)) {
 
       var varName = calleeObj.name;
       var varNode = findVariable(varName, scope);
@@ -155,7 +155,7 @@ function findModule(callExpression, scope) {
 function findDeps(callExpression, scope, type) {
 
   var cantHaveDeps = ['filter', 'value', 'constant'];
-  if (_.contains(cantHaveDeps, type)) {
+  if (_.includes(cantHaveDeps, type)) {
     return [];
   }
 
@@ -310,7 +310,7 @@ function findVariable(varName, scope) {
   var currentScope = scope;
 
   while (!variable && currentScope) {
-    variable = _.findWhere(currentScope.variables, { name: varName });
+    variable = _.find(currentScope.variables, { name: varName });
     currentScope = currentScope.upper;
   }
 

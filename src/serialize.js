@@ -37,7 +37,7 @@ function serialize(unit) {
   });
 
   data.arg = {};
-  data.arg.deps = _.pluck(unit.deps, 'name');
+  data.arg.deps = _.map(unit.deps, 'name');
   data.arg._deps_ = _.map(unit.deps, function (dep) {
     return wrap(dep.name);
   });

@@ -42,6 +42,7 @@ describe('config/index', function () {
       './default': defaultConfigStub,
       '/cache/tleaf.conf.js': cachedConfigStub
     });
+    // console.log(resolvedConfig);
   }
 
   beforeEach(function () {
