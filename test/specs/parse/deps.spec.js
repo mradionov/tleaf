@@ -267,4 +267,25 @@ describe('parse/deps', function () {
     "angular.module('test', []) .component('TestComponent', TestComponent);";
   });
 
+  it('should extract deps for component and controller as ecma6 class declaration',
+      function () {
+        var source =
+            "class TestController {" +
+            "constructor ($scope) {}}" +
+            "angular" +
+            " .module('test', [])" +
+            " .component('TestComponent', {" +
+            "   controller: TestController" +
+            " });";
+
+        var units = parse(source);
+
+        assert.deepEqual(units, [{
+          type: 'component',
+          name: 'TestComponent',
+          module: { name: 'test' },
+          deps: [{ name: '$scope' }]
+        }]);
+      });
+
 });

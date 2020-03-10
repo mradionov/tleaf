@@ -344,6 +344,15 @@ function extractVariableDeps(varName, scope) {
     params = _.get(varNode, 'init.params', []);
   }
 
+  // covers "class SomeClass ...";
+  if (varType === 'ClassDeclaration') {
+    var methods = _.get(varNode, 'body.body', []);
+    var constructor = methods.find((item) => {
+      return item.kind === "constructor"
+    });
+    params = _.get(constructor, 'value.params', []);
+  }
+
   var deps = extractDeps(params);
 
   return deps;
