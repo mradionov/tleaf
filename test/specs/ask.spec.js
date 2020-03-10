@@ -91,7 +91,7 @@ describe('ask', function () {
       assert.deepEqual(question.choices, ['foo', 'bar', 'baz']);
     });
 
-    it.only('should list processed dependencies from config', function () {
+    it('should list processed dependencies from config', function () {
       inquirerStub.prompt = function (questions) {
         inquirerStub.prompt = sinon.stub().returns(Promise.resolve({}));
         return Promise.resolve({
