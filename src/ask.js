@@ -34,7 +34,7 @@ ask.createUnit = function(callback) {
     }
   ];
 
-  inquirer.prompt(questions, function (answers) {
+  inquirer.prompt(questions).then(function (answers) {
 
     var unit = {
       name: answers.name,
@@ -77,7 +77,7 @@ ask.pickUnit = function (units, callback) {
     }
   };
 
-  inquirer.prompt(question, function (answer) {
+  inquirer.prompt(question).then(function (answer) {
     var unit = units[answer.unit];
     callback(unit);
   });
@@ -99,7 +99,7 @@ ask.identifyDeps = function (deps, callback) {
     };
   });
 
-  inquirer.prompt(questions, function (answers) {
+  inquirer.prompt(questions).then(function (answers) {
 
     var identified = _.map(answers, function (type, index) {
       var dep = deps[index];
@@ -138,7 +138,7 @@ function addUnitDependency(deps, callback) {
     }
   ];
 
-  inquirer.prompt(questions, function (answers) {
+  inquirer.prompt(questions).then(function (answers) {
 
     // if user types in empty name - finish adding deps
     if (isEmptyString(answers.name)) {
